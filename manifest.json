@@ -1,0 +1,16 @@
+{
+  "name": "Tap Tunes 拍拍樂",
+  "short_name": "Tap Tunes",
+  "description": "Tap anywhere to play the next note of a favourite children's song.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fff4c7",
+  "theme_color": "#ffcf33",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

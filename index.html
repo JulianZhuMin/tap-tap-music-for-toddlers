@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:xlink="http://www.w3.org/1999/xlink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tap Tunes 拍拍樂</title>
+<meta name="description" content="Tap anywhere to play the next note of a favourite children's song.">
+<meta name="theme-color" content="#ffcf33">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tap Tunes">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    overflow: hidden; overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  }
+  body {
+    position: fixed; inset: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "PingFang HK", "PingFang TC", "Heiti TC", "Microsoft JhengHei", system-ui, sans-serif;
+    background: #fff4c7; color: #1d1d1f;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  body.playing { touch-action: none; }
+  .sr-only {
+    position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  .screen[hidden] { display: none !important; }
+
+  /* ---------- Song picker ---------- */
+  #picker {
+    background: linear-gradient(160deg, #7bdff2 0%, #b2f7ef 35%, #fff3b0 65%, #f7aef8 100%);
+    padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+    gap: 2.5vmin;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  #picker h1 {
+    margin: 0; text-align: center; font-weight: 900;
+    font-size: clamp(22px, 5.5vmin, 46px); line-height: 1.15;
+    color: #3a2a80; text-shadow: 0 2px 0 #fff;
+  }
+  #picker h1 .zh { display: inline-block; margin-left: .4em; }
+  .songs { flex: 1; display: flex; flex-direction: column; gap: 3vmin; list-style: none; margin: 0; padding: 0; min-height: 0; }
+  .songs li { flex: 1; display: flex; min-height: 90px; }
+  @media (orientation: landscape) { .songs { flex-direction: row; } .songs li { min-height: 0; } }
+  @media (orientation: landscape) and (max-height: 500px) { #play-area { gap: 1vmin; padding-top: 40px; } .big-pic { width: 50vmin; height: 50vmin; } }
+  .song-btn {
+    flex: 1; width: 100%; border: 0; margin: 0; cursor: pointer;
+    border-radius: clamp(20px, 6vmin, 48px);
+    font: inherit; color: #1d1d1f;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1vmin; padding: 2vmin 3vmin;
+    box-shadow: 0 1.2vmin 0 rgba(0,0,0,.18), inset 0 -0.8vmin 0 rgba(0,0,0,.08);
+    touch-action: manipulation;
+    transition: transform .08s ease-out, box-shadow .08s ease-out;
+  }
+  .song-btn:active { transform: translateY(.8vmin); box-shadow: 0 .4vmin 0 rgba(0,0,0,.18); }
+  .song-btn:focus-visible { outline: 6px solid #1b1bd6; outline-offset: 4px; }
+  .song-btn[data-song="twinkle"] { background: linear-gradient(180deg, #ffe066, #ffb703); }
+  .song-btn[data-song="row"]     { background: linear-gradient(180deg, #8ce99a, #38b000); }
+  .song-btn[data-song="shark"]   { background: linear-gradient(180deg, #74c0fc, #4263eb); color: #fff; }
+  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .song-btn .pic { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
+  .song-btn .pic svg { width: 100%; height: 100%; max-height: 100%; filter: drop-shadow(0 .8vmin 0 rgba(0,0,0,.15)); }
+  .song-btn .label { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: .3vmin; }
+  .song-btn .en { font-size: clamp(16px, 3.8vmin, 34px); font-weight: 900; text-align: center; line-height: 1.1; }
+  .song-btn .zh { font-size: clamp(18px, 4.4vmin, 38px); font-weight: 800; text-align: center; }
+
+  /* ---------- Play screen ---------- */
+  #play { background: #ffb703; }
+  #play-area {
+    position: absolute; inset: 0; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2vmin; padding: 60px 4vw 50px;
+    background-color: #ffb703;
+    transition: background-color .35s ease-out;
+    touch-action: none; cursor: pointer; outline: none;
+  }
+  #play-area:focus-visible { box-shadow: inset 0 0 0 8px #1b1bd6; }
+  .big-pic { width: min(58vmin, 460px); height: min(58vmin, 460px); flex: 0 1 auto; min-height: 0; filter: drop-shadow(0 1.2vmin 0 rgba(0,0,0,.18)); pointer-events: none; }
+  .big-pic svg { width: 100%; height: 100%; display: block; }
+  .big-pic.idle svg { animation: float 2.4s ease-in-out infinite; }
+  @keyframes float { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-3%) rotate(2deg); } }
+  .big-pic.bump-a svg { animation: bounceA .45s cubic-bezier(.3,1.6,.5,1); }
+  .big-pic.bump-b svg { animation: bounceB .45s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes bounceA { 0% { transform: scale(1); } 25% { transform: translateY(-9%) scale(1.14, .92) rotate(-8deg); } 55% { transform: translateY(2%) scale(.94, 1.06) rotate(5deg); } 80% { transform: rotate(-2deg); } 100% { transform: none; } }
+  @keyframes bounceB { 0% { transform: scale(1); } 25% { transform: translateY(-9%) scale(1.14, .92) rotate(8deg); } 55% { transform: translateY(2%) scale(.94, 1.06) rotate(-5deg); } 80% { transform: rotate(2deg); } 100% { transform: none; } }
+  .song-title { font-size: clamp(16px, 3.6vmin, 30px); font-weight: 800; color: rgba(255,255,255,.95); text-shadow: 0 2px 3px rgba(0,0,0,.35); text-align: center; }
+  .lyric {
+    font-size: clamp(22px, 7vmin, 68px); font-weight: 900; line-height: 1.25;
+    color: #fff; text-align: center; max-width: 95vw;
+    text-shadow: 0 3px 0 rgba(0,0,0,.28), 0 0 12px rgba(0,0,0,.15);
+  }
+  .lyric span { display: inline-block; margin: 0; transition: transform .12s, color .12s; opacity: .75; }
+  .lyric span.done { opacity: 1; }
+  .lyric span.cur { color: #fff200; opacity: 1; transform: scale(1.18) translateY(-.08em); margin: 0 .08em; }
+  .hint { font-size: clamp(16px, 4vmin, 34px); font-weight: 800; color: #fff; text-shadow: 0 2px 3px rgba(0,0,0,.3); text-align: center; }
+  .hint[hidden] { display: none; }
+  .progress {
+    position: absolute; left: 12%; right: 12%;
+    bottom: max(16px, env(safe-area-inset-bottom)); height: 14px;
+    background: rgba(255,255,255,.35); border-radius: 7px; overflow: hidden;
+  }
+  .progress > div { height: 100%; width: 0; background: #fff; border-radius: 7px; transition: width .15s ease-out; }
+  #fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .spark {
+    position: absolute; width: var(--s); height: var(--s);
+    margin-left: calc(var(--s) / -2); margin-top: calc(var(--s) / -2);
+    animation: pop .9s cubic-bezier(.2,.9,.3,1.25) forwards;
+    will-change: transform, opacity;
+  }
+  .spark.circle { border-radius: 50%; box-shadow: 0 0 0 6px rgba(255,255,255,.55); }
+  .spark.star { clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+  @keyframes pop {
+    0%   { transform: scale(.2) rotate(0deg); opacity: 1; }
+    35%  { transform: scale(1.15) translateY(-14px) rotate(35deg); opacity: 1; }
+    65%  { transform: scale(.95) translateY(-4px) rotate(60deg); opacity: 1; }
+    100% { transform: scale(.55) translateY(-70px) rotate(120deg); opacity: 0; }
+  }
+  .celebrate {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;
+    pointer-events: none; font-weight: 900; color: #fff; text-shadow: 0 4px 0 rgba(0,0,0,.25);
+    font-size: clamp(34px, 12vmin, 120px);
+  }
+  .celebrate[hidden] { display: none; }
+  .celebrate > div { animation: cheer 1.8s ease-out forwards; text-align: center; }
+  @keyframes cheer { 0% { transform: scale(.3); opacity: 0; } 20% { transform: scale(1.15); opacity: 1; } 35% { transform: scale(1); } 85% { opacity: 1; } 100% { transform: scale(1.1); opacity: 0; } }
+
+  /* Parent-only back control: small, top-right corner, hold 1.5 s (or tap + confirm) */
+  #back-btn {
+    position: absolute; z-index: 5;
+    top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right));
+    width: 46px; height: 46px; padding: 0; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.7);
+    background: conic-gradient(rgba(255,255,255,.95) calc(var(--p, 0) * 1turn), rgba(0,0,0,.28) 0);
+    color: #fff; font: inherit; font-size: 20px; font-weight: 900; line-height: 1;
+    display: grid; place-items: center; cursor: pointer;
+    touch-action: none; -webkit-touch-callout: none;
+  }
+  #back-btn span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,.35); }
+  #back-btn:focus-visible { outline: 5px solid #1b1bd6; outline-offset: 3px; }
+
+  .overlay {
+    position: absolute; inset: 0; z-index: 10; background: rgba(0,0,0,.45);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    touch-action: none;
+  }
+  .overlay[hidden] { display: none; }
+  .panel {
+    background: #fff; border-radius: 22px; padding: 22px 22px 18px; max-width: 360px; width: 100%;
+    text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.35);
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 22px; }
+  .panel p { margin: 0 0 16px; font-size: 18px; }
+  .panel .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .panel button {
+    font: inherit; font-size: 17px; font-weight: 800; border: 0; border-radius: 14px;
+    padding: 12px 16px; min-height: 48px; cursor: pointer; touch-action: manipulation;
+  }
+  .panel button:focus-visible { outline: 4px solid #1b1bd6; outline-offset: 3px; }
+  #confirm-yes { background: #e03131; color: #fff; }
+  #confirm-no { background: #e9ecef; color: #1d1d1f; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spark { animation-duration: .6s; }
+    .big-pic.bump-a svg, .big-pic.bump-b svg, .big-pic.idle svg { animation: none; }
+  }
+</style>
+</head>
+<body>
+  <!-- Inline SVG pictures (no external images). Referenced with <use> on the buttons and play screen. -->
+  <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g-star" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff59d"/><stop offset=".55" stop-color="#ffd43b"/><stop offset="1" stop-color="#ffa94d"/>
+      </linearGradient>
+      <linearGradient id="g-water" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4dabf7"/><stop offset="1" stop-color="#1c7ed6"/>
+      </linearGradient>
+      <linearGradient id="g-hull" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ff8787"/><stop offset="1" stop-color="#e03131"/>
+      </linearGradient>
+      <linearGradient id="g-shark" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#fcc419"/>
+      </linearGradient>
+    </defs>
+
+    <!-- 1. Big smiling star -->
+    <symbol id="pic-star" viewBox="0 0 200 200">
+      <g fill="#fff" opacity=".95">
+        <path d="M22 28 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4z"/>
+        <path d="M176 30 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z"/>
+        <path d="M180 150 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z"/>
+      </g>
+      <polygon points="100.0,20.0 123.5,75.6 183.7,80.8 138.0,120.4 151.7,179.2 100.0,148.0 48.3,179.2 62.0,120.4 16.3,80.8 76.5,75.6"
+        fill="url(#g-star)" stroke="#f08c00" stroke-width="9" stroke-linejoin="round"/>
+      <path d="M92 40 L84 62" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".8"/>
+      <circle cx="83" cy="104" r="9" fill="#3b2a1a"/><circle cx="86" cy="100" r="3.2" fill="#fff"/>
+      <circle cx="117" cy="104" r="9" fill="#3b2a1a"/><circle cx="120" cy="100" r="3.2" fill="#fff"/>
+      <ellipse cx="68" cy="121" rx="8" ry="5" fill="#ff8fab" opacity=".85"/>
+      <ellipse cx="132" cy="121" rx="8" ry="5" fill="#ff8fab" opacity=".85"/>
+      <path d="M86 122 Q100 138 114 122" fill="none" stroke="#3b2a1a" stroke-width="5" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- 2. Little rowing boat on the waves -->
+    <symbol id="pic-boat" viewBox="0 0 200 200">
+      <circle cx="162" cy="40" r="20" fill="#ffd43b"/>
+      <g stroke="#ffd43b" stroke-width="5" stroke-linecap="round">
+        <path d="M162 8v7M162 65v7M130 40h7M187 40h7M139 17l5 5M180 58l5 5M185 17l-5 5M139 63l5-5"/>
+      </g>
+      <path d="M20 48 q9-9 18 0 q9-9 18 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+      <!-- little rower -->
+      <rect x="84" y="78" width="32" height="30" rx="12" fill="#4263eb"/>
+      <circle cx="100" cy="64" r="17" fill="#ffd8a8" stroke="#e8590c" stroke-width="3"/>
+      <path d="M83 60 Q100 38 117 60 Q100 52 83 60 Z" fill="#7048e8"/>
+      <circle cx="94" cy="65" r="2.6" fill="#212529"/><circle cx="106" cy="65" r="2.6" fill="#212529"/>
+      <path d="M94 72 Q100 77 106 72" fill="none" stroke="#212529" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- hull -->
+      <path d="M24 100 H176 Q170 146 138 152 H62 Q30 146 24 100 Z" fill="url(#g-hull)" stroke="#a61e4d" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M28 113 H172" stroke="#fff" stroke-width="7"/>
+      <path d="M24 100 H176" stroke="#a61e4d" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="100" cy="130" r="7" fill="#fff3bf" stroke="#a61e4d" stroke-width="3"/>
+      <!-- oars -->
+      <g stroke="#8d5a2b" stroke-width="7" stroke-linecap="round">
+        <path d="M86 96 L20 152"/><path d="M114 96 L180 152"/>
+      </g>
+      <ellipse cx="20" cy="152" rx="8" ry="16" transform="rotate(48 20 152)" fill="#a0672f"/>
+      <ellipse cx="180" cy="152" rx="8" ry="16" transform="rotate(-48 180 152)" fill="#a0672f"/>
+      <circle cx="80" cy="101" r="6" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/><circle cx="120" cy="101" r="6" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+      <!-- water -->
+      <path d="M0 150 q12.5-12 25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 V200 H0 Z" fill="url(#g-water)"/>
+      <path d="M10 175 q10-7 20 0 M80 184 q10-7 20 0 M150 175 q10-7 20 0" fill="none" stroke="#d0ebff" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- 3. Cute baby shark -->
+    <symbol id="pic-shark" viewBox="0 0 200 200">
+      <g fill="#d0ebff" stroke="#74c0fc" stroke-width="3">
+        <circle cx="178" cy="60" r="8"/><circle cx="166" cy="38" r="5.5"/><circle cx="186" cy="26" r="4"/>
+      </g>
+      <!-- crescent tail -->
+      <path d="M46 110 L12 58 Q30 92 26 110 Q30 128 12 162 Z" fill="#fab005" stroke="#e67700" stroke-width="5" stroke-linejoin="round"/>
+      <!-- tall dorsal fin -->
+      <path d="M84 80 Q98 56 104 24 Q118 58 140 80 Z" fill="#fab005" stroke="#e67700" stroke-width="5" stroke-linejoin="round"/>
+      <!-- torpedo body with pointy snout -->
+      <path d="M32 110 C50 78 112 64 152 76 C174 83 190 98 194 112 C182 130 152 144 112 144 C72 144 46 132 32 110 Z"
+        fill="url(#g-shark)" stroke="#e67700" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M58 128 Q116 152 190 116 C176 134 150 142 112 142 C84 142 68 136 58 128 Z" fill="#fff9db"/>
+      <!-- side fin -->
+      <path d="M98 130 L82 168 Q108 156 126 136 Z" fill="#fab005" stroke="#e67700" stroke-width="4" stroke-linejoin="round"/>
+      <g fill="none" stroke="#e67700" stroke-width="4" stroke-linecap="round">
+        <path d="M112 98 q-5 10 0 20"/><path d="M122 96 q-5 10 0 20"/><path d="M132 96 q-5 10 0 20"/>
+      </g>
+      <circle cx="156" cy="96" r="11" fill="#212529"/><circle cx="160" cy="92" r="4.2" fill="#fff"/><circle cx="153" cy="100" r="2.2" fill="#fff"/>
+      <ellipse cx="166" cy="114" rx="8" ry="5" fill="#ff8fab" opacity=".9"/>
+      <path d="M150 121 Q166 132 184 118" fill="#fff" stroke="#212529" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M160 125 l3 5 l3 -5.5 M170 125 l3 4.5 l3 -5.5" fill="#fff" stroke="#212529" stroke-width="1.5" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
+
+  <!-- Screen-reader announcements (selected song, play state, song finished) -->
+  <div id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ===== Song picker ===== -->
+  <main id="picker" class="screen" aria-labelledby="picker-title">
+    <h1 id="picker-title"><span lang="en">Pick a song</span> <span class="zh" lang="zh-HK">選一首歌</span></h1>
+    <ul class="songs" aria-label="Songs">
+      <li><button type="button" class="song-btn" data-song="twinkle">
+        <span class="pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use href="#pic-star" xlink:href="#pic-star"/></svg></span>
+        <span class="label">
+          <span class="sr-only" lang="zh-HK">星星，</span>
+          <span class="zh" lang="zh-HK">一閃一閃小星星</span>
+          <span class="en" lang="en">Twinkle Twinkle Little Star</span>
+        </span>
+      </button></li>
+      <li><button type="button" class="song-btn" data-song="row">
+        <span class="pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use href="#pic-boat" xlink:href="#pic-boat"/></svg></span>
+        <span class="label">
+          <span class="sr-only" lang="zh-HK">小船，</span>
+          <span class="zh" lang="zh-HK">划艇歌</span>
+          <span class="en" lang="en">Row Row Row Your Boat</span>
+        </span>
+      </button></li>
+      <li><button type="button" class="song-btn" data-song="shark">
+        <span class="pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use href="#pic-shark" xlink:href="#pic-shark"/></svg></span>
+        <span class="label">
+          <span class="sr-only" lang="zh-HK">小鯊魚，</span>
+          <span class="zh" lang="zh-HK">鯊魚寶寶</span>
+          <span class="en" lang="en">Baby Shark</span>
+        </span>
+      </button></li>
+    </ul>
+  </main>
+
+  <!-- ===== Play screen ===== -->
+  <main id="play" class="screen" hidden>
+    <div id="play-area" role="button" tabindex="0" aria-label="Tap to play next note">
+      <div class="big-pic idle" id="big-pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use id="big-pic-use" href="#pic-star" xlink:href="#pic-star"/></svg></div>
+      <div class="song-title" id="song-title" aria-hidden="true"></div>
+      <div class="lyric" id="lyric" aria-hidden="true"></div>
+      <div class="hint" id="hint" aria-hidden="true">Tap anywhere! <span lang="zh-HK">拍一拍！</span></div>
+      <div class="progress" aria-hidden="true"><div id="progress-bar"></div></div>
+      <div id="fx" aria-hidden="true"></div>
+      <div class="celebrate" id="celebrate" aria-hidden="true" hidden><div>🎉<br>Hooray! 好叻！</div></div>
+    </div>
+    <button type="button" id="back-btn" aria-label="Back to songs (parent control)" aria-describedby="back-help">
+      <span aria-hidden="true">✕</span>
+    </button>
+    <p id="back-help" class="sr-only">Asks you to confirm before leaving. Sighted parents can also press and hold for 1.5 seconds.</p>
+
+    <div id="confirm" class="overlay" hidden>
+      <div class="panel" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-desc">
+        <h2 id="confirm-title">Back to the song list?</h2>
+        <p id="confirm-desc" lang="zh-HK">返回歌曲列表？</p>
+        <div class="row">
+          <button type="button" id="confirm-yes">Yes, back to songs</button>
+          <button type="button" id="confirm-no">Keep playing</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =====================================================================
+     SONG DATA. One tap = one note. Each line: [notes, lyric syllables].
+     Notes are scientific pitch names (C5 = the C above middle C).
+     Syllables are separated by spaces or hyphens and must match 1:1.
+     ===================================================================== */
+  /*SONGS-START*/
+  function sharkVerse(who) {
+    // "Baby shark, doo doo doo doo doo doo" x3, then "Baby shark!"  (key of G)
+    var line = ['D5 E5 G5 G5 G5 G5 G5 G5 G5', who + ' shark doo doo doo doo doo doo'];
+    return [line, line, line, ['G5 G5 F#5', who + ' shark!']];
+  }
+  var SONGS = [
+    {
+      id: 'twinkle', en: 'Twinkle Twinkle Little Star', zh: '一閃一閃小星星', pic: 'star', picZh: '星星',
+      colors: [48, 200, 280],
+      lines: [
+        ['C5 C5 G5 G5 A5 A5 G5', 'Twin-kle twin-kle lit-tle star'],
+        ['F5 F5 E5 E5 D5 D5 C5', 'How I won-der what you are'],
+        ['G5 G5 F5 F5 E5 E5 D5', 'Up a-bove the world so high'],
+        ['G5 G5 F5 F5 E5 E5 D5', 'Like a dia-mond in the sky'],
+        ['C5 C5 G5 G5 A5 A5 G5', 'Twin-kle twin-kle lit-tle star'],
+        ['F5 F5 E5 E5 D5 D5 C5', 'How I won-der what you are']
+      ]
+    },
+    {
+      id: 'row', en: 'Row Row Row Your Boat', zh: '划艇歌', pic: 'boat', picZh: '小船',
+      colors: [120, 190, 30],
+      lines: [
+        ['C5 C5 C5 D5 E5', 'Row row row your boat'],
+        ['E5 D5 E5 F5 G5', 'Gent-ly down the stream'],
+        ['C6 C6 C6 G5 G5 G5 E5 E5 E5 C5 C5 C5', 'Mer-ri-ly mer-ri-ly mer-ri-ly mer-ri-ly'],
+        ['G5 F5 E5 D5 C5', 'Life is but a dream']
+      ]
+    },
+    {
+      id: 'shark', en: 'Baby Shark', zh: '鯊魚寶寶', pic: 'shark', picZh: '小鯊魚',
+      colors: [210, 330, 180],
+      lines: [].concat(
+        sharkVerse('Ba-by'),
+        sharkVerse('Mom-my'),
+        sharkVerse('Dad-dy'),
+        sharkVerse('Grand-ma'),
+        sharkVerse('Grand-pa')
+      )
+    }
+  ];
+  /*SONGS-END*/
+
+  var HOLD_MS = 1500;          // long-press length for the back control
+  var CELEBRATION_MS = 2400;   // celebration length before the song restarts
+  var CLICK_DEDUPE_MS = 700;   // ignore the synthetic click that follows a real tap
+
+  /* ---------- helpers ---------- */
+  var SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  function noteToMidi(n) {
+    var m = /^([A-G])(#|b)?(\d)$/.exec(n);
+    if (!m) throw new Error('Bad note name: ' + n);
+    return 12 * (Number(m[3]) + 1) + SEMI[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
+  }
+  function noteToFreq(n) { return 440 * Math.pow(2, (noteToMidi(n) - 69) / 12); }
+  function splitSyllables(text) {
+    var out = [];
+    text.trim().split(/\s+/).forEach(function (word) {
+      var parts = word.split('-');
+      parts.forEach(function (p, i) { out.push(i < parts.length - 1 ? p + '-' : p); });
+    });
+    return out;
+  }
+  function prepareSong(s) {
+    var notes = [], syl = [], lineOf = [], lineStart = [];
+    s.lines.forEach(function (line, li) {
+      var n = line[0].trim().split(/\s+/), w = splitSyllables(line[1]);
+      if (n.length !== w.length) console.error('Song "' + s.id + '" line ' + (li + 1) + ': ' + n.length + ' notes but ' + w.length + ' syllables');
+      lineStart.push(notes.length);
+      n.forEach(function (note, i) { noteToMidi(note); notes.push(note); syl.push(w[i] || ''); lineOf.push(li); });
+    });
+    s.notes = notes; s.syllables = syl; s.lineOf = lineOf; s.lineStart = lineStart;
+    return s;
+  }
+  SONGS.forEach(prepareSong);
+  var SONG_BY_ID = {};
+  SONGS.forEach(function (s) { SONG_BY_ID[s.id] = s; });
+
+  function $(id) { return document.getElementById(id); }
+  var picker = $('picker'), play = $('play'), playArea = $('play-area'), fx = $('fx'),
+      bigPic = $('big-pic'), bigPicUse = $('big-pic-use'), songTitle = $('song-title'), lyric = $('lyric'), hint = $('hint'),
+      progressBar = $('progress-bar'), celebrateEl = $('celebrate'), backBtn = $('back-btn'),
+      confirmEl = $('confirm'), confirmYes = $('confirm-yes'), confirmNo = $('confirm-no'),
+      announcer = $('announcer');
+
+  function now() { return (window.performance && performance.now) ? performance.now() : Date.now(); }
+
+  var announceTimer = 0;
+  function announce(html) {
+    // Clear then set, so repeating the same message is still spoken.
+    clearTimeout(announceTimer);
+    announcer.textContent = '';
+    announceTimer = setTimeout(function () { announcer.innerHTML = html; }, 80);
+  }
+
+  /* =====================================================================
+     AUDIO: Web Audio "music box / soft piano" synth
+     ===================================================================== */
+  var ctx = null, master = null;
+  function ensureAudio() {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!ctx) {
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* ignore */ }
+      try { ctx = new AC(); } catch (e) { return null; }
+      var comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -14; comp.knee.value = 12; comp.ratio.value = 6;
+      comp.attack.value = 0.003; comp.release.value = 0.25;
+      master = ctx.createGain();
+      master.gain.value = 0.8;
+      master.connect(comp); comp.connect(ctx.destination);
+      // Play one silent sample inside the user gesture: this unlocks iOS Safari.
+      try {
+        var buf = ctx.createBuffer(1, 1, 22050), src = ctx.createBufferSource();
+        src.buffer = buf; src.connect(ctx.destination); src.start(0);
+      } catch (e) { /* ignore */ }
+    }
+    if (ctx.state !== 'running' && ctx.resume) {
+      try { var p = ctx.resume(); if (p && p.catch) p.catch(function () {}); } catch (e) { /* ignore */ }
+    }
+    return ctx;
+  }
+
+  // [frequency multiple, level, waveform, decay seconds]
+  var PARTIALS = [
+    [1, 1.0, 'sine', 1.4],
+    [2, 0.35, 'sine', 0.7],
+    [3, 0.12, 'triangle', 0.35],
+    [4.01, 0.06, 'sine', 0.12]   // tiny bright "tine" for the pluck
+  ];
+  var stats = { tonesPlayed: 0 };
+  function playTone(freq, when, vel, dur) {
+    if (!ctx || !master) return;
+    vel = vel == null ? 1 : vel; dur = dur || 1.4;
+    var t = Math.max(when || 0, ctx.currentTime);
+    var out = ctx.createGain();
+    out.gain.setValueAtTime(0.0001, t);
+    out.gain.exponentialRampToValueAtTime(0.42 * vel, t + 0.006);
+    out.gain.exponentialRampToValueAtTime(0.14 * vel, t + 0.3);
+    out.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    out.connect(master);
+    var first = null;
+    PARTIALS.forEach(function (p) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = p[2]; o.frequency.setValueAtTime(freq * p[0], t);
+      g.gain.setValueAtTime(p[1], t);
+      g.gain.exponentialRampToValueAtTime(Math.max(p[1] * 0.001, 0.00001), t + Math.min(p[3], dur));
+      o.connect(g); g.connect(out);
+      o.start(t); o.stop(t + dur + 0.05);
+      if (!first) first = o;
+    });
+    first.onended = function () { try { out.disconnect(); } catch (e) { /* ignore */ } };
+    stats.tonesPlayed++;
+  }
+
+  function playCelebrationSound() {
+    if (!ctx) return;
+    var t = ctx.currentTime + 0.02;
+    // Rising sparkly arpeggio, then a bright chord.
+    ['C6', 'E6', 'G6', 'C7', 'G6', 'C7', 'E7'].forEach(function (n, i) {
+      playTone(noteToFreq(n), t + i * 0.09, 0.55, 0.9);
+    });
+    ['C6', 'E6', 'G6', 'C7'].forEach(function (n) { playTone(noteToFreq(n), t + 0.72, 0.4, 1.6); });
+  }
+
+  /* =====================================================================
+     STATE
+     ===================================================================== */
+  var state = { screen: 'picker', song: null, index: 0, celebrating: false, loops: 0, lastNote: null, notesPlayed: 0 };
+  var celebrateTimers = [];
+  var lastPointerTime = -1e9, screenChangedAt = -1e9, lastSongBtn = null;
+
+  /* ---------- visuals ---------- */
+  function randomBright() { return 'hsl(' + Math.floor(Math.random() * 360) + ',95%,' + (55 + Math.floor(Math.random() * 12)) + '%)'; }
+  function spawnSpark(x, y, big) {
+    var r = playArea.getBoundingClientRect();
+    var el = document.createElement('div');
+    var size = (big ? 70 : 55) + Math.random() * (big ? 90 : 65);
+    el.className = 'spark ' + (Math.random() < 0.55 ? 'star' : 'circle');
+    el.style.left = (x - r.left) + 'px';
+    el.style.top = (y - r.top) + 'px';
+    el.style.setProperty('--s', size.toFixed(0) + 'px');
+    el.style.background = randomBright();
+    fx.appendChild(el);
+    var kill = function () { if (el.parentNode) el.parentNode.removeChild(el); };
+    el.addEventListener('animationend', kill);
+    setTimeout(kill, 1500);
+    while (fx.childElementCount > 45) fx.removeChild(fx.firstChild);
+  }
+  function flashBackground() {
+    var s = state.song, hues = s ? s.colors : [45];
+    var h = (hues[Math.floor(Math.random() * hues.length)] + Math.floor(Math.random() * 60) - 30 + 360) % 360;
+    playArea.style.backgroundColor = 'hsl(' + h + ',85%,58%)';
+  }
+  var bumpFlip = false;
+  function bump() {
+    // Alternate two bounce/wiggle animations so every tap restarts the motion.
+    bumpFlip = !bumpFlip;
+    bigPic.className = 'big-pic ' + (bumpFlip ? 'bump-a' : 'bump-b');
+  }
+  function renderLyric(playedIndex) {
+    var s = state.song; if (!s) return;
+    var li = playedIndex >= 0 ? s.lineOf[playedIndex] : 0;
+    var start = s.lineStart[li], end = li + 1 < s.lineStart.length ? s.lineStart[li + 1] : s.notes.length;
+    var frag = document.createDocumentFragment();
+    for (var i = start; i < end; i++) {
+      var sp = document.createElement('span'), syl = s.syllables[i], midWord = /-$/.test(syl);
+      sp.textContent = midWord ? syl.slice(0, -1) : syl;   // "Twin-" + "kle" shows as "Twinkle"
+      if (i < playedIndex) sp.className = 'done';
+      else if (i === playedIndex) sp.className = 'cur';
+      frag.appendChild(sp);
+      if (!midWord && i < end - 1) frag.appendChild(document.createTextNode(' '));
+    }
+    lyric.textContent = '';
+    lyric.appendChild(frag);
+    progressBar.style.width = (100 * state.index / s.notes.length).toFixed(2) + '%';
+  }
+
+  /* ---------- core: one tap = next note ---------- */
+  function advance(x, y) {
+    if (state.screen !== 'play' || !state.song) return;
+    ensureAudio();
+    spawnSpark(x, y);
+    if (state.celebrating) return;  // sparkles only while the celebration plays
+    var s = state.song, i = state.index, note = s.notes[i];
+    playTone(noteToFreq(note));
+    state.lastNote = note; state.notesPlayed++;
+    state.index = i + 1;
+    hint.hidden = true;
+    renderLyric(i);
+    bump(); flashBackground();
+    if (state.index >= s.notes.length) celebrate();
+  }
+
+  function celebrate() {
+    state.celebrating = true;
+    celebrateTimers.push(setTimeout(function () {
+      playCelebrationSound();
+      celebrateEl.hidden = false;
+      var r = playArea.getBoundingClientRect();
+      for (var k = 0; k < 22; k++) {
+        (function (k) {
+          celebrateTimers.push(setTimeout(function () {
+            spawnSpark(r.left + Math.random() * r.width, r.top + Math.random() * r.height, true);
+          }, k * 45));
+        })(k);
+      }
+      announce('Hooray! You finished ' + state.song.en + '. Starting again.');
+    }, 350));
+    celebrateTimers.push(setTimeout(function () {
+      celebrateEl.hidden = true;
+      state.index = 0; state.loops++; state.celebrating = false;
+      renderLyric(-1);
+    }, CELEBRATION_MS));
+  }
+  function clearCelebration() {
+    celebrateTimers.forEach(clearTimeout); celebrateTimers = [];
+    state.celebrating = false; celebrateEl.hidden = true;
+  }
+
+  /* ---------- screens ---------- */
+  var wakeLock = null;
+  function keepAwake(on) {
+    try {
+      if (on && navigator.wakeLock && !wakeLock) {
+        navigator.wakeLock.request('screen').then(function (l) { wakeLock = l; }, function () {});
+      } else if (!on && wakeLock) {
+        var l = wakeLock; wakeLock = null; l.release().catch(function () {});
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function startSong(id, btn) {
+    var s = SONG_BY_ID[id]; if (!s) return;
+    ensureAudio(); // inside the tap/click handler: unlocks audio on iOS
+    clearCelebration();
+    state.song = s; state.index = 0; state.lastNote = null; state.loops = 0; state.screen = 'play';
+    lastSongBtn = btn || null;
+    screenChangedAt = now();
+    bigPicUse.setAttribute('href', '#pic-' + s.pic);
+    bigPicUse.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#pic-' + s.pic);
+    bigPic.className = 'big-pic idle';
+    songTitle.innerHTML = '';
+    songTitle.appendChild(document.createTextNode(s.en + ' · '));
+    var zh = document.createElement('span'); zh.lang = 'zh-HK'; zh.textContent = s.zh; songTitle.appendChild(zh);
+    playArea.style.backgroundColor = 'hsl(' + s.colors[0] + ',85%,58%)';
+    playArea.setAttribute('aria-label', s.picZh + '，' + s.zh + '. ' + s.en + '. Tap to play next note.');
+    fx.textContent = '';
+    hint.hidden = false;
+    renderLyric(-1);
+    picker.hidden = true; play.hidden = false; confirmEl.hidden = true;
+    document.body.classList.add('playing');
+    try { playArea.focus({ preventScroll: true }); } catch (e) { playArea.focus(); }
+    announce('Playing <span lang="zh-HK">' + s.picZh + '，' + s.zh + '</span>, <span lang="en">' + s.en + '</span>. Tap anywhere to play the next note.');
+    keepAwake(true);
+  }
+
+  function goToPicker() {
+    clearCelebration(); cancelHold(); closeConfirm(true);
+    state.screen = 'picker'; state.song = null; state.index = 0;
+    screenChangedAt = now();
+    play.hidden = true; picker.hidden = false;
+    document.body.classList.remove('playing');
+    var target = lastSongBtn || picker.querySelector('.song-btn');
+    try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+    announce('Song list. Choose a song.');
+    keepAwake(false);
+  }
+
+  /* ---------- picker events ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.song-btn'), function (btn) {
+    btn.addEventListener('click', function () {
+      if (now() - screenChangedAt < 500) return; // ignore a stray tap that lands right after leaving play
+      startSong(btn.getAttribute('data-song'), btn);
+    });
+  });
+
+  /* ---------- play-area events ---------- */
+  function centre() { var r = playArea.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
+  if (window.PointerEvent) {
+    playArea.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      e.preventDefault();
+      lastPointerTime = now();
+      advance(e.clientX, e.clientY);   // every finger = its own pointerdown = one note
+    });
+  } else {
+    playArea.addEventListener('touchstart', function (e) {
+      lastPointerTime = now();
+      for (var i = 0; i < e.changedTouches.length; i++) advance(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+    }, { passive: false });
+    playArea.addEventListener('mousedown', function (e) { if (e.button !== 0) return; lastPointerTime = now(); advance(e.clientX, e.clientY); });
+  }
+  // Block double-tap zoom, scrolling, magnifier and callouts; also (re)unlock audio on touchend (iOS gesture).
+  playArea.addEventListener('touchstart', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+  playArea.addEventListener('touchmove', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+  playArea.addEventListener('touchend', function (e) { if (e.cancelable) e.preventDefault(); ensureAudio(); }, { passive: false });
+  // VoiceOver double-tap / Switch Control / keyboard "click" with no preceding pointer = one note.
+  playArea.addEventListener('click', function (e) {
+    if (now() - lastPointerTime < CLICK_DEDUPE_MS) return;
+    var c = centre();
+    advance(e.clientX || c[0], e.clientY || c[1]);
+  });
+  playArea.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      if (e.repeat) return;
+      var c = centre(); advance(c[0], c[1]);
+    }
+  });
+
+  /* ---------- back control: hold 1.5 s, or tap -> confirm dialog ---------- */
+  var holdTimer = 0, holdRaf = 0, holdStart = 0, holding = false, holdDone = false, suppressBackClickUntil = 0;
+  function setRing(p) { backBtn.style.setProperty('--p', p.toFixed(3)); }
+  function holdTick() {
+    if (!holding) return;
+    setRing(Math.min(1, (now() - holdStart) / HOLD_MS));
+    holdRaf = requestAnimationFrame(holdTick);
+  }
+  function cancelHold() {
+    holding = false; clearTimeout(holdTimer); cancelAnimationFrame(holdRaf); setRing(0);
+  }
+  backBtn.addEventListener('pointerdown', function (e) {
+    e.stopPropagation();
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    ensureAudio();
+    holding = true; holdDone = false; holdStart = now();
+    try { backBtn.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    holdTimer = setTimeout(function () { holding = false; holdDone = true; suppressBackClickUntil = now() + CLICK_DEDUPE_MS; goToPicker(); }, HOLD_MS);
+    holdRaf = requestAnimationFrame(holdTick);
+  });
+  backBtn.addEventListener('pointerup', function (e) {
+    e.stopPropagation();
+    if (!holding) return;
+    cancelHold();
+    suppressBackClickUntil = now() + CLICK_DEDUPE_MS;
+    if (!holdDone) openConfirm();
+  });
+  backBtn.addEventListener('pointercancel', cancelHold);
+  // Suppress compatibility mouse events / ghost clicks and the iOS long-press callout on touch.
+  backBtn.addEventListener('touchstart', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+  backBtn.addEventListener('touchend', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+  backBtn.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  backBtn.addEventListener('click', function (e) {
+    // Keyboard / VoiceOver activation (no pointer sequence) opens the confirm dialog.
+    e.stopPropagation();
+    if (now() < suppressBackClickUntil) return;
+    openConfirm();
+  });
+
+  var confirmOpenedAt = 0;
+  function openConfirm() {
+    if (state.screen !== 'play' || !confirmEl.hidden) return;
+    confirmOpenedAt = now();
+    confirmEl.hidden = false;
+    playArea.setAttribute('aria-hidden', 'true'); backBtn.setAttribute('aria-hidden', 'true');
+    playArea.inert = true; backBtn.inert = true;
+    try { confirmYes.focus({ preventScroll: true }); } catch (e) { confirmYes.focus(); }
+  }
+  function closeConfirm(silent) {
+    if (confirmEl.hidden) return;
+    confirmEl.hidden = true;
+    playArea.removeAttribute('aria-hidden'); backBtn.removeAttribute('aria-hidden');
+    playArea.inert = false; backBtn.inert = false;
+    if (!silent) { try { playArea.focus({ preventScroll: true }); } catch (e) { playArea.focus(); } }
+  }
+  confirmYes.addEventListener('click', function () { goToPicker(); });
+  confirmNo.addEventListener('click', function () { closeConfirm(false); });
+  // A tap on the dimmed background (not the panel) just closes the dialog - toddler-safe.
+  confirmEl.addEventListener('pointerdown', function (e) {
+    if (e.target !== confirmEl) return;
+    e.preventDefault();
+    if (now() - confirmOpenedAt < 350) return;
+    closeConfirm(false);
+  });
+  confirmEl.addEventListener('touchstart', function (e) { if (e.target === confirmEl && e.cancelable) e.preventDefault(); }, { passive: false });
+  confirmEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeConfirm(false); }
+    else if (e.key === 'Tab') { // keep focus inside the dialog
+      e.preventDefault();
+      (document.activeElement === confirmYes ? confirmNo : confirmYes).focus();
+    }
+  });
+
+  /* ---------- global guards (no zoom, no selection, no context menu while playing) ---------- */
+  // Pinch-zoom is blocked on the play screen only (touch-action:none + Safari gesture events);
+  // the song list stays zoomable for low-vision grown-ups.
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (t) {
+    document.addEventListener(t, function (e) { if (state.screen === 'play') e.preventDefault(); }, { passive: false });
+  });
+  document.addEventListener('contextmenu', function (e) { if (state.screen === 'play') e.preventDefault(); });
+  document.addEventListener('selectstart', function (e) { if (state.screen === 'play') e.preventDefault(); });
+  document.addEventListener('dblclick', function (e) { if (state.screen === 'play') e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove', function (e) { if (state.screen === 'play' && e.cancelable) e.preventDefault(); }, { passive: false });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && state.screen === 'play') { wakeLock = null; keepAwake(true); }
+  });
+
+  /* ---------- offline support (only works when served over http(s)) ---------- */
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  }
+
+  /* ---------- test / debug hook (read-only snapshot) ---------- */
+  window.ToddlerMusic = {
+    songs: SONGS,
+    noteToFreq: noteToFreq,
+    HOLD_MS: HOLD_MS, CELEBRATION_MS: CELEBRATION_MS,
+    getState: function () {
+      return {
+        screen: state.screen, songId: state.song ? state.song.id : null, index: state.index,
+        total: state.song ? state.song.notes.length : 0, celebrating: state.celebrating, loops: state.loops,
+        lastNote: state.lastNote, notesPlayed: state.notesPlayed, tonesPlayed: stats.tonesPlayed,
+        audioState: ctx ? ctx.state : 'none', confirmOpen: !confirmEl.hidden
+      };
+    }
+  };
+})();
+</script>
+</body>
+</html>
