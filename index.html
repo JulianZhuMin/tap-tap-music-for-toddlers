@@ -149,13 +149,16 @@
     font-size: clamp(34px, 12vmin, 120px);
   }
   .celebrate[hidden] { display: none; }
-  .clap-hands { display: block; margin: 0 auto -1vmin; width: min(38vmin, 300px); height: auto; overflow: visible; filter: drop-shadow(0 1vmin 0 rgba(0,0,0,.18)); }
-  .clap-hands .clap-l { transform-box: view-box; transform-origin: 75px 142px; animation: clap-l .44s ease-in-out infinite; }
-  .clap-hands .clap-r { transform-box: view-box; transform-origin: 125px 142px; animation: clap-r .44s ease-in-out infinite; }
-  .clap-hands .clap-lines { animation: clap-pop .44s ease-out infinite; }
-  @keyframes clap-l { 0%, 100% { transform: translateX(-14px) rotate(-24deg); } 45%, 55% { transform: translateX(2px) rotate(0deg); } }
-  @keyframes clap-r { 0%, 100% { transform: translateX(14px) rotate(24deg); } 45%, 55% { transform: translateX(-2px) rotate(0deg); } }
-  @keyframes clap-pop { 0%, 40% { opacity: 0; transform: scale(.8); } 55% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.1); } }
+  /* Clapping crowd: 8 small pairs of hands around the edges, each clapping at its own rate while the applause plays */
+  #clap-crowd { position: absolute; inset: 0; pointer-events: none; animation: crowd-life 2.5s ease-out forwards; }
+  @keyframes crowd-life { 0% { opacity: 0; } 8% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+  .clap-pair { position: absolute; width: min(21vmin, 150px); height: auto; overflow: visible; filter: drop-shadow(0 .8vmin 0 rgba(0,0,0,.18)); }
+  .clap-pair .cl { transform-box: view-box; transform-origin: 37px 80px; animation: clap-l var(--r) ease-in-out var(--ph) infinite; }
+  .clap-pair .cr { transform-box: view-box; transform-origin: 63px 80px; animation: clap-r var(--r) ease-in-out var(--ph) infinite; }
+  .clap-pair .burst { animation: clap-pop var(--r) ease-out var(--ph) infinite; }
+  @keyframes clap-l { 0%, 100% { transform: translateX(-9px) rotate(-26deg); } 45%, 55% { transform: translateX(0) rotate(0deg); } }
+  @keyframes clap-r { 0%, 100% { transform: translateX(9px) rotate(26deg); } 45%, 55% { transform: translateX(0) rotate(0deg); } }
+  @keyframes clap-pop { 0%, 42% { opacity: 0; } 52% { opacity: 1; } 85%, 100% { opacity: 0; } }
   .celebrate > div { animation: cheer 1.8s ease-out forwards; text-align: center; }
   @keyframes cheer { 0% { transform: scale(.3); opacity: 0; } 20% { transform: scale(1.15); opacity: 1; } 35% { transform: scale(1); } 85% { opacity: 1; } 100% { transform: scale(1.1); opacity: 0; } }
 
@@ -249,18 +252,35 @@
   #big-pic-art .foam-flow { animation: flow-200 12.8s linear infinite; }
   @keyframes flow-50 { from { transform: translateX(0); } to { transform: translateX(-50px); } }
   @keyframes flow-200 { from { transform: translateX(0); } to { transform: translateX(-200px); } }
-  /* London Bridge: the road deck gently rises and falls; the bus drives back and forth; two people stroll on the walkway */
+  /* 小兔子乖乖: ears turn gently from their bases (out of phase), pupils roll round in their eyes */
+  .eye-whites { opacity: 0; }
+  #big-pic-art .eye-whites { opacity: 1; }
+  #big-pic-art .ear-l { transform-origin: 79px 102px; animation: ear-turn 2.6s ease-in-out infinite; }
+  #big-pic-art .ear-r { transform-origin: 121px 102px; animation: ear-turn 2.6s ease-in-out -0.9s infinite reverse; }
+  @keyframes ear-turn { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+  #big-pic-art .pupils { animation: eye-roll 2.6s linear infinite; }
+  @keyframes eye-roll {
+    0% { transform: translate(0.00px, -3.00px); }
+    6.25% { transform: translate(1.15px, -2.77px); }
+    12.5% { transform: translate(2.12px, -2.12px); }
+    18.75% { transform: translate(2.77px, -1.15px); }
+    25% { transform: translate(3.00px, 0.00px); }
+    31.25% { transform: translate(2.77px, 1.15px); }
+    37.5% { transform: translate(2.12px, 2.12px); }
+    43.75% { transform: translate(1.15px, 2.77px); }
+    50% { transform: translate(0.00px, 3.00px); }
+    56.25% { transform: translate(-1.15px, 2.77px); }
+    62.5% { transform: translate(-2.12px, 2.12px); }
+    68.75% { transform: translate(-2.77px, 1.15px); }
+    75% { transform: translate(-3.00px, 0.00px); }
+    81.25% { transform: translate(-2.77px, -1.15px); }
+    87.5% { transform: translate(-2.12px, -2.12px); }
+    93.75% { transform: translate(-1.15px, -2.77px); }
+    100% { transform: translate(0.00px, -3.00px); }
+  }
+  /* London Bridge: the road deck (with the parked bus) gently rises and falls like breathing */
   #big-pic-art .deck { animation: breathe 3s ease-in-out infinite; }
   @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-  #big-pic-art .bus-drive { transform-origin: 100px 110px; animation: drive 9s ease-in-out infinite; }
-  @keyframes drive {
-    0% { transform: translateX(-62px) scaleX(1); } 46% { transform: translateX(62px) scaleX(1); }
-    50% { transform: translateX(62px) scaleX(-1); } 96% { transform: translateX(-62px) scaleX(-1); } 100% { transform: translateX(-62px) scaleX(1); }
-  }
-  #big-pic-art .walker-a { animation: stroll 6s ease-in-out infinite alternate; }
-  #big-pic-art .walker-b { animation: stroll-back 7s ease-in-out -2s infinite alternate; }
-  @keyframes stroll { from { transform: translateX(0); } to { transform: translateX(40px); } }
-  @keyframes stroll-back { from { transform: translateX(0); } to { transform: translateX(-40px); } }
   /* Sakura: petals blown by a gentle breeze (diagonal drift left-to-right, sway, tumble, an occasional gust) */
   #petals { position: absolute; inset: 0; pointer-events: none; overflow: hidden; display: none; }
   #play-area[data-song="sakura"] #petals { display: block; }
@@ -285,10 +305,11 @@
     .hand-wave { animation-duration: 1.8s; }
     .float-note, .wave-lines { animation: none; }
     #big-pic-art .twinkles, #big-pic-art .oar-l, #big-pic-art .oar-r, #big-pic-art .water-flow, #big-pic-art .foam-flow,
-    #big-pic-art .deck, #big-pic-art .bus-drive, #big-pic-art .walker-a, #big-pic-art .walker-b { animation: none; }
+    #big-pic-art .deck, #big-pic-art .ear-l, #big-pic-art .ear-r, #big-pic-art .pupils { animation: none; }
     #petals { display: none !important; }
-    .clap-hands .clap-l, .clap-hands .clap-r { animation-duration: 1.2s; }
-    .clap-hands .clap-lines { animation: none; opacity: 0; }
+    .clap-pair:nth-child(n+5) { display: none; }
+    .clap-pair .cl, .clap-pair .cr { animation-duration: 1.2s; }
+    .clap-pair .burst { animation: none; opacity: 0; }
   }
 </style>
 </head>
@@ -385,21 +406,18 @@
       <!-- high walkways between the towers -->
       <rect x="66" y="56" width="68" height="9" fill="#74c0fc" stroke="#1864ab" stroke-width="3"/>
       <rect x="66" y="70" width="68" height="9" fill="#74c0fc" stroke="#1864ab" stroke-width="3"/>
-      <!-- two little people strolling on the top walkway -->
-      <g class="walker-a"><circle cx="78" cy="45" r="3.6" fill="#ffd8a8" stroke="#7a4a1f" stroke-width="1.2"/><rect x="74.5" y="48.5" width="7" height="8" rx="2.5" fill="#f03e3e"/></g>
-      <g class="walker-b"><circle cx="121" cy="45" r="3.6" fill="#ffd8a8" stroke="#7a4a1f" stroke-width="1.2"/><rect x="117.5" y="48.5" width="7" height="8" rx="2.5" fill="#fab005"/></g>
       <path d="M70 58 L80 63 M80 58 L90 63 M90 58 L100 63 M100 58 L110 63 M110 58 L120 63 M120 58 L130 63 M70 72 L80 77 M80 72 L90 77 M90 72 L100 77 M100 72 L110 77 M110 72 L120 77 M120 72 L130 77" stroke="#fff" stroke-width="2"/>
-      <!-- road deck (gently rises and falls on the play screen) with the little red bus driving back and forth -->
+      <!-- road deck (gently rises and falls on the play screen); the little red bus is parked on it (static) -->
       <g class="deck">
       <rect x="-2" y="120" width="204" height="12" fill="#339af0" stroke="#1864ab" stroke-width="3"/>
       <path d="M0 126 H200" stroke="#fff" stroke-width="2" stroke-dasharray="7 6"/>
       <!-- little red bus on the bridge -->
-      <g class="bus-drive anim-origin"><g transform="translate(86 101)">
+      <g transform="translate(86 101)">
         <rect x="0" y="0" width="28" height="19" rx="4" fill="#e03131" stroke="#a51111" stroke-width="2"/>
         <rect x="3" y="3" width="6" height="5" rx="1" fill="#e7f5ff"/><rect x="11" y="3" width="6" height="5" rx="1" fill="#e7f5ff"/><rect x="19" y="3" width="6" height="5" rx="1" fill="#e7f5ff"/>
         <rect x="3" y="10" width="6" height="4" rx="1" fill="#e7f5ff"/><rect x="11" y="10" width="6" height="4" rx="1" fill="#e7f5ff"/><rect x="19" y="10" width="6" height="4" rx="1" fill="#e7f5ff"/>
         <circle cx="7" cy="19" r="3" fill="#343a40"/><circle cx="21" cy="19" r="3" fill="#343a40"/>
-      </g></g>
+      </g>
       </g>
       <!-- two towers -->
       <g stroke="#7a6446" stroke-width="3" stroke-linejoin="round">
@@ -425,20 +443,23 @@
 
     <!-- 4. Cute white bunny (小兔子乖乖) with long pink-lined ears -->
     <symbol id="pic-bunny" viewBox="0 0 200 200">
-      <!-- long ears -->
-      <g stroke="#7d6f66" stroke-width="5">
-        <ellipse cx="70" cy="58" rx="21" ry="50" transform="rotate(-12 70 58)" fill="url(#g-bunny)"/>
-        <ellipse cx="130" cy="58" rx="21" ry="50" transform="rotate(12 130 58)" fill="url(#g-bunny)"/>
+      <!-- long ears (each turns from its base on the play screen, like listening at the door) -->
+      <g class="ear-l anim-origin">
+        <ellipse cx="70" cy="58" rx="21" ry="50" transform="rotate(-12 70 58)" fill="url(#g-bunny)" stroke="#7d6f66" stroke-width="5"/>
+        <ellipse cx="70" cy="62" rx="10" ry="36" transform="rotate(-12 70 62)" fill="#ffb3cf"/>
       </g>
-      <g fill="#ffb3cf">
-        <ellipse cx="70" cy="62" rx="10" ry="36" transform="rotate(-12 70 62)"/>
-        <ellipse cx="130" cy="62" rx="10" ry="36" transform="rotate(12 130 62)"/>
+      <g class="ear-r anim-origin">
+        <ellipse cx="130" cy="58" rx="21" ry="50" transform="rotate(12 130 58)" fill="url(#g-bunny)" stroke="#7d6f66" stroke-width="5"/>
+        <ellipse cx="130" cy="62" rx="10" ry="36" transform="rotate(12 130 62)" fill="#ffb3cf"/>
       </g>
       <!-- round head -->
       <ellipse cx="100" cy="130" rx="64" ry="56" fill="url(#g-bunny)" stroke="#7d6f66" stroke-width="5"/>
-      <!-- big shiny eyes -->
-      <g fill="#343a40"><circle cx="77" cy="122" r="9"/><circle cx="123" cy="122" r="9"/></g>
-      <g fill="#fff"><circle cx="80" cy="118" r="3.2"/><circle cx="126" cy="118" r="3.2"/></g>
+      <!-- big shiny eyes; the white eyeballs only show on the play screen, where the pupils roll round (咕嚕嚕) -->
+      <g class="eye-whites" fill="#fff" stroke="#7d6f66" stroke-width="2.5"><circle cx="77" cy="122" r="13.5"/><circle cx="123" cy="122" r="13.5"/></g>
+      <g class="pupils">
+        <g fill="#343a40"><circle cx="77" cy="122" r="9"/><circle cx="123" cy="122" r="9"/></g>
+        <g fill="#fff"><circle cx="80" cy="118" r="3.2"/><circle cx="126" cy="118" r="3.2"/></g>
+      </g>
       <!-- rosy cheeks -->
       <ellipse cx="60" cy="145" rx="11" ry="7" fill="#ff8fab" opacity=".7"/>
       <ellipse cx="140" cy="145" rx="11" ry="7" fill="#ff8fab" opacity=".7"/>
@@ -578,20 +599,7 @@
       <div class="progress" aria-hidden="true"><div id="progress-bar"></div></div>
       <div id="petals" aria-hidden="true"></div>
       <div id="fx" aria-hidden="true"></div>
-      <div class="celebrate" id="celebrate" aria-hidden="true" hidden><div><svg class="clap-hands" viewBox="0 0 200 150" focusable="false">
-        <!-- two chubby baby hands clapping in time with the applause -->
-        <g class="clap-lines" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round">
-          <path d="M100 8 V26"/><path d="M70 16 L78 32"/><path d="M130 16 L122 32"/>
-        </g>
-        <g class="clap-l"><rect x="52" y="44" width="46" height="72" rx="23" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/>
-          <ellipse cx="54" cy="96" rx="11" ry="20" transform="rotate(-25 54 96)" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/>
-          <path d="M64 58 V78 M75 54 V78 M86 58 V78" stroke="#e8a27a" stroke-width="3" stroke-linecap="round"/>
-          <rect x="60" y="112" width="30" height="30" rx="8" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/></g>
-        <g class="clap-r"><rect x="102" y="44" width="46" height="72" rx="23" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/>
-          <ellipse cx="146" cy="96" rx="11" ry="20" transform="rotate(25 146 96)" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/>
-          <path d="M114 58 V78 M125 54 V78 M136 58 V78" stroke="#e8a27a" stroke-width="3" stroke-linecap="round"/>
-          <rect x="110" y="112" width="30" height="30" rx="8" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/></g>
-      </svg>🎉<br>Hooray! 好叻！</div></div>
+      <div class="celebrate" id="celebrate" aria-hidden="true" hidden><div id="clap-crowd" aria-hidden="true"></div><div>🎉<br>Hooray! 好叻！</div></div>
     </div>
     <button type="button" id="back-btn" aria-label="返回歌曲列表 Back to songs（家長用 parent control）" aria-describedby="back-help">
       <span aria-hidden="true">✕</span>
@@ -1036,7 +1044,7 @@
   }
   /* ---------- per-song theme animations ---------- */
   // The big picture is an inline copy of the song's <symbol> (not a <use>), so CSS can animate its parts
-  // (oars, water, bridge deck, bus, walkers, star glow) on the play screen only; the picker buttons stay still.
+  // (oars, water, bridge deck, bunny ears and eyes, star glow) on the play screen only; the picker buttons stay still.
   function showBigPic(pic) {
     var sym = document.getElementById('pic-' + pic);
     bigPicArt.textContent = '';
@@ -1060,6 +1068,31 @@
     clearTimeout(glowTimer);
     glowTimer = setTimeout(function () { bigPicArt.setAttribute('class', ''); }, 600);
   }
+  (function makeClapCrowd() {
+    // 8 pairs of little mitten / baby hands for the celebration applause (edges and corners, never over the banner).
+    var crowd = document.getElementById('clap-crowd'), NS = 'http://www.w3.org/2000/svg';
+    var spots = [[2, 3], [38, 1], [72, 8], [1, 20], [-1, 21], [2, 66], [-2, 64], [40, 76]];   // negative x = distance from the right edge
+    var looks = [ // [hand, outline, cuff]
+      ['#ff6b6b', '#c92a2a', '#fff'], ['#ffd8b8', '#c9825a', '#4dabf7'], ['#ffd43b', '#e67700', '#7950f2'], ['#8d5524', '#5c3310', '#ff922b'],
+      ['#69db7c', '#2b8a3e', '#fff'], ['#c68642', '#8a5a2b', '#f06595'], ['#74c0fc', '#1c7ed6', '#ffe066'], ['#f1c27d', '#b07d3a', '#20c997']];
+    function hand(cls, x, look) {
+      var tx = cls === 'cl' ? x + 2 : x + 24, rot = cls === 'cl' ? -25 : 25;
+      return '<g class="' + cls + '"><rect x="' + x + '" y="20" width="26" height="46" rx="13" fill="' + look[0] + '" stroke="' + look[1] + '" stroke-width="3"/>' +
+        '<ellipse cx="' + tx + '" cy="52" rx="6.5" ry="11" transform="rotate(' + rot + ' ' + tx + ' 52)" fill="' + look[0] + '" stroke="' + look[1] + '" stroke-width="3"/>' +
+        '<rect x="' + (x + 3) + '" y="64" width="20" height="16" rx="5" fill="' + look[2] + '" stroke="' + look[1] + '" stroke-width="3"/></g>';
+    }
+    spots.forEach(function (sp, k) {
+      var svg = document.createElementNS(NS, 'svg'), look = looks[k % looks.length];
+      svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('class', 'clap-pair'); svg.setAttribute('focusable', 'false'); svg.setAttribute('aria-hidden', 'true');
+      if (sp[0] < 0) svg.style.right = (-sp[0]) + '%'; else svg.style.left = sp[0] + '%';
+      svg.style.top = sp[1] + '%';
+      svg.style.setProperty('--r', (0.2 + Math.random() * 0.13).toFixed(3) + 's');   // one clap every 0.20-0.33 s = 3-5 claps per second
+      svg.style.setProperty('--ph', (-Math.random() * 0.3).toFixed(3) + 's');
+      svg.innerHTML = '<g class="burst" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><path d="M50 2 V12"/><path d="M34 6 L39 15"/><path d="M66 6 L61 15"/></g>' +
+        hand('cl', 24, look) + hand('cr', 50, look);
+      crowd.appendChild(svg);
+    });
+  })();
   (function makePetals() {
     // Sakura: 14 CSS-animated petals, each with its own start position, breeze drift, sway and tumble speed.
     for (var k = 0; k < 14; k++) {

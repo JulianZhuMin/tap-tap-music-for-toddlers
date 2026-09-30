@@ -1,5 +1,5 @@
 /* Offline cache for 兒歌彈彈樂 Tap Tap Music for Toddlers. Bump CACHE when index.html or any asset changes. */
-var CACHE = 'tap-tunes-v5';
+var CACHE = 'tap-tunes-v6';
 var ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './icon-180.png', './icon-512.png', './hooray.wav', './byebye.wav'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); }).then(function () { return self.skipWaiting(); }));
