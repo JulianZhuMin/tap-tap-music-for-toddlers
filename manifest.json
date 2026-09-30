@@ -1,8 +1,8 @@
 {
-  "name": "Tap Tunes 拍拍樂",
-  "short_name": "Tap Tunes",
+  "name": "兒歌彈彈樂 Tap Tap Music for Toddlers",
+  "short_name": "兒歌彈彈樂",
   "description": "Tap anywhere to play the next note of a favourite children's song.",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",

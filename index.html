@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tap Tunes 拍拍樂</title>
-<meta name="description" content="Tap anywhere to play the next note of a favourite children's song.">
+<title>兒歌彈彈樂 Tap Tap Music for Toddlers</title>
+<meta name="description" content="Tap anywhere to play the next note of a favourite children's song. 拍一拍，唱兒歌。">
 <meta name="theme-color" content="#ffcf33">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tap Tunes">
+<meta name="apple-mobile-web-app-title" content="兒歌彈彈樂">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -51,31 +51,46 @@
     color: #3a2a80; text-shadow: 0 2px 0 #fff;
   }
   #picker h1 .zh { display: inline-block; margin-left: .4em; }
-  .songs { flex: 1; display: flex; flex-direction: column; gap: 3vmin; list-style: none; margin: 0; padding: 0; min-height: 0; }
-  .songs li { flex: 1; display: flex; min-height: 90px; }
-  @media (orientation: landscape) { .songs { flex-direction: row; } .songs li { min-height: 0; } }
+  .songs {
+    flex: 1; min-height: 0; list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 2.4vmin;
+    grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr);
+  }
+  .songs li { display: flex; min-height: 0; min-width: 0; }
+  .songs li:last-child { grid-column: span 2; }
+  @media (orientation: landscape) {
+    .songs { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .songs li { grid-column: span 2; }
+    .songs li:nth-child(4), .songs li:nth-child(5) { grid-column: span 3; }
+  }
+  @media (orientation: landscape) and (min-aspect-ratio: 16/9) {
+    .songs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .songs li, .songs li:nth-child(4), .songs li:nth-child(5) { grid-column: span 1; }
+  }
   @media (orientation: landscape) and (max-height: 500px) { #play-area { gap: 1vmin; padding-top: 40px; } .big-pic { width: 50vmin; height: 50vmin; } }
   .song-btn {
-    flex: 1; width: 100%; border: 0; margin: 0; cursor: pointer;
-    border-radius: clamp(20px, 6vmin, 48px);
+    flex: 1; width: 100%; min-width: 0; border: 0; margin: 0; cursor: pointer;
+    border-radius: clamp(18px, 5vmin, 44px);
     font: inherit; color: #1d1d1f;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 1vmin; padding: 2vmin 3vmin;
+    gap: .8vmin; padding: 1.6vmin 2vmin;
     box-shadow: 0 1.2vmin 0 rgba(0,0,0,.18), inset 0 -0.8vmin 0 rgba(0,0,0,.08);
     touch-action: manipulation;
     transition: transform .08s ease-out, box-shadow .08s ease-out;
   }
   .song-btn:active { transform: translateY(.8vmin); box-shadow: 0 .4vmin 0 rgba(0,0,0,.18); }
   .song-btn:focus-visible { outline: 6px solid #1b1bd6; outline-offset: 4px; }
-  .song-btn[data-song="twinkle"] { background: linear-gradient(180deg, #ffe066, #ffb703); }
-  .song-btn[data-song="row"]     { background: linear-gradient(180deg, #8ce99a, #38b000); }
-  .song-btn[data-song="shark"]   { background: linear-gradient(180deg, #74c0fc, #4263eb); color: #fff; }
+  .song-btn[data-song="twinkle"] { background: linear-gradient(180deg, #4c6ef5, #3b5bdb); color: #fff; }
+  .song-btn[data-song="row"]     { background: linear-gradient(180deg, #c5f6fa, #66d9e8); }
+  .song-btn[data-song="london"]  { background: linear-gradient(180deg, #ffe8cc, #ffc078); }
+  .song-btn[data-song="bunny"]   { background: linear-gradient(180deg, #d0ebff, #74c0fc); }
+  .song-btn[data-song="sakura"]  { background: linear-gradient(180deg, #d3f9d8, #8ce99a); }
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
   .song-btn .pic { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
   .song-btn .pic svg { width: 100%; height: 100%; max-height: 100%; filter: drop-shadow(0 .8vmin 0 rgba(0,0,0,.15)); }
   .song-btn .label { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: .3vmin; }
-  .song-btn .en { font-size: clamp(16px, 3.8vmin, 34px); font-weight: 900; text-align: center; line-height: 1.1; }
-  .song-btn .zh { font-size: clamp(18px, 4.4vmin, 38px); font-weight: 800; text-align: center; }
+  .song-btn .en { font-size: clamp(15px, 3.4vmin, 32px); font-weight: 900; text-align: center; line-height: 1.1; }
+  .song-btn .zh { font-size: clamp(17px, 4vmin, 36px); font-weight: 800; text-align: center; line-height: 1.15; }
 
   /* ---------- Play screen ---------- */
   #play { background: #ffb703; }
@@ -134,6 +149,13 @@
     font-size: clamp(34px, 12vmin, 120px);
   }
   .celebrate[hidden] { display: none; }
+  .clap-hands { display: block; margin: 0 auto -1vmin; width: min(38vmin, 300px); height: auto; overflow: visible; filter: drop-shadow(0 1vmin 0 rgba(0,0,0,.18)); }
+  .clap-hands .clap-l { transform-box: view-box; transform-origin: 75px 142px; animation: clap-l .44s ease-in-out infinite; }
+  .clap-hands .clap-r { transform-box: view-box; transform-origin: 125px 142px; animation: clap-r .44s ease-in-out infinite; }
+  .clap-hands .clap-lines { animation: clap-pop .44s ease-out infinite; }
+  @keyframes clap-l { 0%, 100% { transform: translateX(-14px) rotate(-24deg); } 45%, 55% { transform: translateX(2px) rotate(0deg); } }
+  @keyframes clap-r { 0%, 100% { transform: translateX(14px) rotate(24deg); } 45%, 55% { transform: translateX(-2px) rotate(0deg); } }
+  @keyframes clap-pop { 0%, 40% { opacity: 0; transform: scale(.8); } 55% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.1); } }
   .celebrate > div { animation: cheer 1.8s ease-out forwards; text-align: center; }
   @keyframes cheer { 0% { transform: scale(.3); opacity: 0; } 20% { transform: scale(1.15); opacity: 1; } 35% { transform: scale(1); } 85% { opacity: 1; } 100% { transform: scale(1.1); opacity: 0; } }
 
@@ -172,9 +194,101 @@
   #confirm-yes { background: #e03131; color: #fff; }
   #confirm-no { background: #e9ecef; color: #1d1d1f; }
 
+
+  /* ---------- Goodbye screen (after 3 songs) ---------- */
+  #goodbye {
+    background: linear-gradient(170deg, #d0bfff 0%, #fcc2d7 55%, #ffe8cc 100%);
+    align-items: center; justify-content: center; gap: 1vmin;
+    padding: max(64px, env(safe-area-inset-top)) 4vw max(20px, env(safe-area-inset-bottom));
+    touch-action: none; overflow: hidden;
+  }
+  .hand-wrap { position: relative; width: min(78vw, 46vh, 440px); aspect-ratio: 5 / 6; height: auto; flex: 0 0 auto; }
+  @supports not (aspect-ratio: 1) { .hand-wrap { height: min(93.6vw, 55vh, 528px); } }
+  .hand-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .hand-wave { transform-origin: 50% 94%; animation: wave 1s ease-in-out infinite alternate; filter: drop-shadow(0 1.2vmin 0 rgba(80,40,120,.18)); }
+  @keyframes wave { from { transform: rotate(-17deg); } to { transform: rotate(17deg); } }
+  .wave-lines { animation: wiggle 1s ease-in-out infinite alternate; transform-origin: 50% 50%; }
+  @keyframes wiggle { from { opacity: .35; transform: scale(.92); } to { opacity: 1; transform: scale(1.04); } }
+  .float-note { position: absolute; font-size: clamp(26px, 8vmin, 70px); color: #fff; text-shadow: 0 3px 0 rgba(90,40,140,.25); animation: drift 3.2s ease-in-out infinite; pointer-events: none; }
+  @keyframes drift { 0%, 100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-14%) rotate(8deg); } }
+  #bye-title {
+    margin: 0; font-size: clamp(38px, 12vmin, 120px); font-weight: 900; line-height: 1.1; text-align: center;
+    color: #5f3dc4; text-shadow: 0 3px 0 #fff, 0 0 16px rgba(255,255,255,.8); outline: none;
+  }
+  #bye-title .zh { display: inline-block; margin-right: .25em; }
+  .bye-sub { margin: 0; font-size: clamp(16px, 3.6vmin, 30px); font-weight: 800; color: #5f3dc4; text-align: center; }
+  #again-btn {
+    position: absolute; z-index: 5;
+    top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right));
+    min-height: 46px; padding: 0 14px 0 12px; border-radius: 23px; overflow: hidden;
+    border: 2px solid rgba(255,255,255,.8); background: #5f3dc4; color: #fff;
+    font: inherit; font-size: 15px; font-weight: 800; line-height: 1.1; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    touch-action: none; -webkit-touch-callout: none;
+  }
+  #again-btn::after { content: ""; position: absolute; left: 0; bottom: 0; height: 5px; width: calc(var(--p, 0) * 100%); background: #fff; }
+  #again-btn:focus-visible { outline: 5px solid #1b1bd6; outline-offset: 3px; }
+  #again-yes { background: #5f3dc4; color: #fff; }
+  #again-no { background: #e9ecef; color: #1d1d1f; }
+
+
+  /* ---------- per-song theme animations (big picture on the play screen only) ---------- */
+  #big-pic-art .anim-origin { transform-box: view-box; }
+  /* Twinkle: soft glow that eases up on each tap then slowly dims; very slow idle shimmer of the tiny sparkles */
+  #big-pic-art .star-glow, #big-pic-art .star-shine { opacity: 0; transition: opacity 1.2s ease-in-out; }
+  #big-pic-art.glow .star-glow { opacity: .95; transition: opacity .55s ease-out; }
+  #big-pic-art.glow .star-shine { opacity: .5; transition: opacity .55s ease-out; }
+  #big-pic-art .twinkles { animation: shimmer 3.6s ease-in-out infinite; }
+  @keyframes shimmer { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+  /* Row your boat: oars row in a slow loop, water and foam flow backwards (to the left) */
+  #big-pic-art .oar-l { transform-origin: 86px 96px; animation: row-l 2.6s ease-in-out infinite; }
+  #big-pic-art .oar-r { transform-origin: 114px 96px; animation: row-r 2.6s ease-in-out infinite; }
+  @keyframes row-l { 0%, 100% { transform: rotate(9deg); } 45% { transform: rotate(-13deg); } }
+  @keyframes row-r { 0%, 100% { transform: rotate(-9deg); } 45% { transform: rotate(13deg); } }
+  #big-pic-art .water-flow { animation: flow-50 3.2s linear infinite; }
+  #big-pic-art .foam-flow { animation: flow-200 12.8s linear infinite; }
+  @keyframes flow-50 { from { transform: translateX(0); } to { transform: translateX(-50px); } }
+  @keyframes flow-200 { from { transform: translateX(0); } to { transform: translateX(-200px); } }
+  /* London Bridge: the road deck gently rises and falls; the bus drives back and forth; two people stroll on the walkway */
+  #big-pic-art .deck { animation: breathe 3s ease-in-out infinite; }
+  @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  #big-pic-art .bus-drive { transform-origin: 100px 110px; animation: drive 9s ease-in-out infinite; }
+  @keyframes drive {
+    0% { transform: translateX(-62px) scaleX(1); } 46% { transform: translateX(62px) scaleX(1); }
+    50% { transform: translateX(62px) scaleX(-1); } 96% { transform: translateX(-62px) scaleX(-1); } 100% { transform: translateX(-62px) scaleX(1); }
+  }
+  #big-pic-art .walker-a { animation: stroll 6s ease-in-out infinite alternate; }
+  #big-pic-art .walker-b { animation: stroll-back 7s ease-in-out -2s infinite alternate; }
+  @keyframes stroll { from { transform: translateX(0); } to { transform: translateX(40px); } }
+  @keyframes stroll-back { from { transform: translateX(0); } to { transform: translateX(-40px); } }
+  /* Sakura: petals blown by a gentle breeze (diagonal drift left-to-right, sway, tumble, an occasional gust) */
+  #petals { position: absolute; inset: 0; pointer-events: none; overflow: hidden; display: none; }
+  #play-area[data-song="sakura"] #petals { display: block; }
+  .petal-fall { position: absolute; top: -10%; left: var(--x); animation: petal-fall var(--d) linear var(--delay) infinite; will-change: transform; }
+  @keyframes petal-fall {
+    0%   { transform: translate3d(0, 0, 0); }
+    35%  { transform: translate3d(calc(var(--drift) * .28), 42vh, 0); }
+    50%  { transform: translate3d(calc(var(--drift) * .55), 60vh, 0); }
+    100% { transform: translate3d(var(--drift), 122vh, 0); }
+  }
+  .petal-sway { display: block; animation: petal-sway var(--sw) ease-in-out infinite alternate; }
+  @keyframes petal-sway { from { transform: translateX(-3.5vmin) rotate(-18deg); } to { transform: translateX(3.5vmin) rotate(18deg); } }
+  .petal { display: block; width: var(--size); height: calc(var(--size) * .75); border-radius: 0 100% 0 100%;
+    background: linear-gradient(135deg, #ffffff, #ffe3ee 55%, #ffc2d9); opacity: .95;
+    box-shadow: 0 0 0 1.5px rgba(194, 37, 92, .55), 0 2px 3px rgba(0, 0, 0, .12);
+    animation: petal-tumble var(--t) linear infinite; }
+  @keyframes petal-tumble { from { transform: rotate(0deg) rotateX(0deg); } to { transform: rotate(360deg) rotateX(360deg); } }
+
   @media (prefers-reduced-motion: reduce) {
     .spark { animation-duration: .6s; }
     .big-pic.bump-a svg, .big-pic.bump-b svg, .big-pic.idle svg { animation: none; }
+    .hand-wave { animation-duration: 1.8s; }
+    .float-note, .wave-lines { animation: none; }
+    #big-pic-art .twinkles, #big-pic-art .oar-l, #big-pic-art .oar-r, #big-pic-art .water-flow, #big-pic-art .foam-flow,
+    #big-pic-art .deck, #big-pic-art .bus-drive, #big-pic-art .walker-a, #big-pic-art .walker-b { animation: none; }
+    #petals { display: none !important; }
+    .clap-hands .clap-l, .clap-hands .clap-r { animation-duration: 1.2s; }
+    .clap-hands .clap-lines { animation: none; opacity: 0; }
   }
 </style>
 </head>
@@ -183,28 +297,40 @@
   <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="g-star" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#fff59d"/><stop offset=".55" stop-color="#ffd43b"/><stop offset="1" stop-color="#ffa94d"/>
+        <stop offset="0" stop-color="#fff9c4"/><stop offset=".5" stop-color="#ffe066"/><stop offset="1" stop-color="#fcc419"/>
       </linearGradient>
       <linearGradient id="g-water" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="#4dabf7"/><stop offset="1" stop-color="#1c7ed6"/>
       </linearGradient>
-      <linearGradient id="g-hull" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#ff8787"/><stop offset="1" stop-color="#e03131"/>
+      <linearGradient id="g-wood" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8a5a33"/><stop offset=".55" stop-color="#6b4226"/><stop offset="1" stop-color="#4a2c17"/>
       </linearGradient>
-      <linearGradient id="g-shark" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#fcc419"/>
+      <linearGradient id="g-stone" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#fff4dc"/><stop offset="1" stop-color="#e9d3a8"/>
       </linearGradient>
+      <radialGradient id="g-bunny" cx=".42" cy=".36" r=".75">
+        <stop offset="0" stop-color="#ffffff"/><stop offset=".7" stop-color="#fbf7f4"/><stop offset="1" stop-color="#e9e2dc"/>
+      </radialGradient>
+      <radialGradient id="g-glow" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#fffbe6" stop-opacity="1"/><stop offset=".45" stop-color="#ffe066" stop-opacity=".75"/><stop offset="1" stop-color="#ffe066" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="g-petal" cx="100" cy="100" r="80" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#ff5c9a"/><stop offset=".35" stop-color="#ff9cc2"/><stop offset="1" stop-color="#ffe0ec"/>
+      </radialGradient>
     </defs>
 
-    <!-- 1. Big smiling star -->
+    <!-- 1. Big smiling yellow star -->
     <symbol id="pic-star" viewBox="0 0 200 200">
-      <g fill="#fff" opacity=".95">
+      <circle class="star-glow" cx="100" cy="104" r="100" fill="url(#g-glow)" opacity="0"/>
+      <g class="twinkles" fill="#fff" opacity=".95">
         <path d="M22 28 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4z"/>
         <path d="M176 30 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z"/>
         <path d="M180 150 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z"/>
       </g>
       <polygon points="100.0,20.0 123.5,75.6 183.7,80.8 138.0,120.4 151.7,179.2 100.0,148.0 48.3,179.2 62.0,120.4 16.3,80.8 76.5,75.6"
-        fill="url(#g-star)" stroke="#f08c00" stroke-width="9" stroke-linejoin="round"/>
+        fill="url(#g-star)" stroke="#f59f00" stroke-width="9" stroke-linejoin="round"/>
+      <polygon class="star-shine" points="100.0,20.0 123.5,75.6 183.7,80.8 138.0,120.4 151.7,179.2 100.0,148.0 48.3,179.2 62.0,120.4 16.3,80.8 76.5,75.6"
+        fill="#fffbe0" stroke="#f59f00" stroke-width="9" stroke-linejoin="round" opacity="0"/>
       <path d="M92 40 L84 62" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".8"/>
       <circle cx="83" cy="104" r="9" fill="#3b2a1a"/><circle cx="86" cy="100" r="3.2" fill="#fff"/>
       <circle cx="117" cy="104" r="9" fill="#3b2a1a"/><circle cx="120" cy="100" r="3.2" fill="#fff"/>
@@ -213,74 +339,200 @@
       <path d="M86 122 Q100 138 114 122" fill="none" stroke="#3b2a1a" stroke-width="5" stroke-linecap="round"/>
     </symbol>
 
-    <!-- 2. Little rowing boat on the waves -->
+    <!-- 2. Dark-wood rowing boat on the waves -->
     <symbol id="pic-boat" viewBox="0 0 200 200">
-      <circle cx="162" cy="40" r="20" fill="#ffd43b"/>
-      <g stroke="#ffd43b" stroke-width="5" stroke-linecap="round">
-        <path d="M162 8v7M162 65v7M130 40h7M187 40h7M139 17l5 5M180 58l5 5M185 17l-5 5M139 63l5-5"/>
-      </g>
+      <!-- little cloud -->
+      <path d="M132 52 a14 14 0 0 1 16-18 a18 18 0 0 1 32 4 a12 12 0 0 1 4 24 h-46 a10 10 0 0 1 -6-10z" fill="#fff" opacity=".95"/>
       <path d="M20 48 q9-9 18 0 q9-9 18 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
       <!-- little rower -->
-      <rect x="84" y="78" width="32" height="30" rx="12" fill="#4263eb"/>
+      <rect x="84" y="78" width="32" height="30" rx="12" fill="#f76707"/>
       <circle cx="100" cy="64" r="17" fill="#ffd8a8" stroke="#e8590c" stroke-width="3"/>
-      <path d="M83 60 Q100 38 117 60 Q100 52 83 60 Z" fill="#7048e8"/>
+      <path d="M83 60 Q100 38 117 60 Q100 52 83 60 Z" fill="#e03131"/>
       <circle cx="94" cy="65" r="2.6" fill="#212529"/><circle cx="106" cy="65" r="2.6" fill="#212529"/>
       <path d="M94 72 Q100 77 106 72" fill="none" stroke="#212529" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- hull -->
-      <path d="M24 100 H176 Q170 146 138 152 H62 Q30 146 24 100 Z" fill="url(#g-hull)" stroke="#a61e4d" stroke-width="5" stroke-linejoin="round"/>
-      <path d="M28 113 H172" stroke="#fff" stroke-width="7"/>
-      <path d="M24 100 H176" stroke="#a61e4d" stroke-width="8" stroke-linecap="round"/>
-      <circle cx="100" cy="130" r="7" fill="#fff3bf" stroke="#a61e4d" stroke-width="3"/>
+      <!-- dark wooden hull with planks -->
+      <path d="M22 100 H178 Q171 147 138 153 H62 Q29 147 22 100 Z" fill="url(#g-wood)" stroke="#3b2212" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M27 116 Q100 122 173 116" fill="none" stroke="#3b2212" stroke-width="3" opacity=".75"/>
+      <path d="M36 133 Q100 140 164 133" fill="none" stroke="#3b2212" stroke-width="3" opacity=".75"/>
+      <path d="M30 109 Q100 114 170 109" fill="none" stroke="#b07a4a" stroke-width="2.5" opacity=".7"/>
+      <path d="M40 125 Q100 131 160 125" fill="none" stroke="#b07a4a" stroke-width="2.5" opacity=".6"/>
+      <path d="M22 100 H178" stroke="#3b2212" stroke-width="9" stroke-linecap="round"/>
+      <g fill="#c9975f"><circle cx="46" cy="100" r="2.4"/><circle cx="100" cy="100" r="2.4"/><circle cx="154" cy="100" r="2.4"/></g>
       <!-- oars -->
-      <g stroke="#8d5a2b" stroke-width="7" stroke-linecap="round">
-        <path d="M86 96 L20 152"/><path d="M114 96 L180 152"/>
+      <g class="oar-l anim-origin">
+        <path d="M86 96 L20 152" stroke="#a8773f" stroke-width="7" stroke-linecap="round"/>
+        <ellipse cx="20" cy="152" rx="8" ry="16" transform="rotate(48 20 152)" fill="#c08a4f"/>
       </g>
-      <ellipse cx="20" cy="152" rx="8" ry="16" transform="rotate(48 20 152)" fill="#a0672f"/>
-      <ellipse cx="180" cy="152" rx="8" ry="16" transform="rotate(-48 180 152)" fill="#a0672f"/>
+      <g class="oar-r anim-origin">
+        <path d="M114 96 L180 152" stroke="#a8773f" stroke-width="7" stroke-linecap="round"/>
+        <ellipse cx="180" cy="152" rx="8" ry="16" transform="rotate(-48 180 152)" fill="#c08a4f"/>
+      </g>
       <circle cx="80" cy="101" r="6" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/><circle cx="120" cy="101" r="6" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
       <!-- water -->
-      <path d="M0 150 q12.5-12 25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 V200 H0 Z" fill="url(#g-water)"/>
-      <path d="M10 175 q10-7 20 0 M80 184 q10-7 20 0 M150 175 q10-7 20 0" fill="none" stroke="#d0ebff" stroke-width="4" stroke-linecap="round"/>
+      <g class="water-flow"><path d="M0 150 q12.5-12 25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 V200 H0 Z" fill="url(#g-water)"/></g>
+      <g class="foam-flow"><path d="M10 175 q10-7 20 0 M80 184 q10-7 20 0 M150 175 q10-7 20 0 M210 175 q10-7 20 0 M280 184 q10-7 20 0 M350 175 q10-7 20 0" fill="none" stroke="#d0ebff" stroke-width="4" stroke-linecap="round"/></g>
     </symbol>
 
-    <!-- 3. Cute baby shark -->
-    <symbol id="pic-shark" viewBox="0 0 200 200">
-      <g fill="#d0ebff" stroke="#74c0fc" stroke-width="3">
-        <circle cx="178" cy="60" r="8"/><circle cx="166" cy="38" r="5.5"/><circle cx="186" cy="26" r="4"/>
+    <!-- 3. London Bridge (Tower Bridge style: two towers, high walkway, road and chains) -->
+    <symbol id="pic-bridge" viewBox="0 0 200 200">
+      <!-- water -->
+      <path d="M0 162 q12.5-8 25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 V200 H0 Z" fill="url(#g-water)"/>
+      <path d="M12 184 q9-6 18 0 M90 190 q9-6 18 0 M165 183 q9-6 18 0" fill="none" stroke="#d0ebff" stroke-width="3.5" stroke-linecap="round"/>
+      <!-- side chains (suspension) -->
+      <path d="M50 70 Q24 96 0 116" fill="none" stroke="#1971c2" stroke-width="6" stroke-linecap="round"/>
+      <path d="M150 70 Q176 96 200 116" fill="none" stroke="#1971c2" stroke-width="6" stroke-linecap="round"/>
+      <g stroke="#1971c2" stroke-width="2.5"><path d="M36 84 V122 M22 97 V122 M10 107 V122 M164 84 V122 M178 97 V122 M190 107 V122"/></g>
+      <!-- high walkways between the towers -->
+      <rect x="66" y="56" width="68" height="9" fill="#74c0fc" stroke="#1864ab" stroke-width="3"/>
+      <rect x="66" y="70" width="68" height="9" fill="#74c0fc" stroke="#1864ab" stroke-width="3"/>
+      <!-- two little people strolling on the top walkway -->
+      <g class="walker-a"><circle cx="78" cy="45" r="3.6" fill="#ffd8a8" stroke="#7a4a1f" stroke-width="1.2"/><rect x="74.5" y="48.5" width="7" height="8" rx="2.5" fill="#f03e3e"/></g>
+      <g class="walker-b"><circle cx="121" cy="45" r="3.6" fill="#ffd8a8" stroke="#7a4a1f" stroke-width="1.2"/><rect x="117.5" y="48.5" width="7" height="8" rx="2.5" fill="#fab005"/></g>
+      <path d="M70 58 L80 63 M80 58 L90 63 M90 58 L100 63 M100 58 L110 63 M110 58 L120 63 M120 58 L130 63 M70 72 L80 77 M80 72 L90 77 M90 72 L100 77 M100 72 L110 77 M110 72 L120 77 M120 72 L130 77" stroke="#fff" stroke-width="2"/>
+      <!-- road deck (gently rises and falls on the play screen) with the little red bus driving back and forth -->
+      <g class="deck">
+      <rect x="-2" y="120" width="204" height="12" fill="#339af0" stroke="#1864ab" stroke-width="3"/>
+      <path d="M0 126 H200" stroke="#fff" stroke-width="2" stroke-dasharray="7 6"/>
+      <!-- little red bus on the bridge -->
+      <g class="bus-drive anim-origin"><g transform="translate(86 101)">
+        <rect x="0" y="0" width="28" height="19" rx="4" fill="#e03131" stroke="#a51111" stroke-width="2"/>
+        <rect x="3" y="3" width="6" height="5" rx="1" fill="#e7f5ff"/><rect x="11" y="3" width="6" height="5" rx="1" fill="#e7f5ff"/><rect x="19" y="3" width="6" height="5" rx="1" fill="#e7f5ff"/>
+        <rect x="3" y="10" width="6" height="4" rx="1" fill="#e7f5ff"/><rect x="11" y="10" width="6" height="4" rx="1" fill="#e7f5ff"/><rect x="19" y="10" width="6" height="4" rx="1" fill="#e7f5ff"/>
+        <circle cx="7" cy="19" r="3" fill="#343a40"/><circle cx="21" cy="19" r="3" fill="#343a40"/>
+      </g></g>
       </g>
-      <!-- crescent tail -->
-      <path d="M46 110 L12 58 Q30 92 26 110 Q30 128 12 162 Z" fill="#fab005" stroke="#e67700" stroke-width="5" stroke-linejoin="round"/>
-      <!-- tall dorsal fin -->
-      <path d="M84 80 Q98 56 104 24 Q118 58 140 80 Z" fill="#fab005" stroke="#e67700" stroke-width="5" stroke-linejoin="round"/>
-      <!-- torpedo body with pointy snout -->
-      <path d="M32 110 C50 78 112 64 152 76 C174 83 190 98 194 112 C182 130 152 144 112 144 C72 144 46 132 32 110 Z"
-        fill="url(#g-shark)" stroke="#e67700" stroke-width="5" stroke-linejoin="round"/>
-      <path d="M58 128 Q116 152 190 116 C176 134 150 142 112 142 C84 142 68 136 58 128 Z" fill="#fff9db"/>
-      <!-- side fin -->
-      <path d="M98 130 L82 168 Q108 156 126 136 Z" fill="#fab005" stroke="#e67700" stroke-width="4" stroke-linejoin="round"/>
-      <g fill="none" stroke="#e67700" stroke-width="4" stroke-linecap="round">
-        <path d="M112 98 q-5 10 0 20"/><path d="M122 96 q-5 10 0 20"/><path d="M132 96 q-5 10 0 20"/>
+      <!-- two towers -->
+      <g stroke="#7a6446" stroke-width="3" stroke-linejoin="round">
+        <rect x="42" y="44" width="28" height="118" fill="url(#g-stone)"/>
+        <rect x="130" y="44" width="28" height="118" fill="url(#g-stone)"/>
+        <!-- stone piers in the river -->
+        <rect x="36" y="148" width="40" height="18" rx="3" fill="#ced4da"/>
+        <rect x="124" y="148" width="40" height="18" rx="3" fill="#ced4da"/>
       </g>
-      <circle cx="156" cy="96" r="11" fill="#212529"/><circle cx="160" cy="92" r="4.2" fill="#fff"/><circle cx="153" cy="100" r="2.2" fill="#fff"/>
-      <ellipse cx="166" cy="114" rx="8" ry="5" fill="#ff8fab" opacity=".9"/>
-      <path d="M150 121 Q166 132 184 118" fill="#fff" stroke="#212529" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M160 125 l3 5 l3 -5.5 M170 125 l3 4.5 l3 -5.5" fill="#fff" stroke="#212529" stroke-width="1.5" stroke-linejoin="round"/>
+      <!-- gothic windows -->
+      <g fill="#1864ab">
+        <path d="M51 88 v-9 a5 5 0 0 1 10 0 v9z"/><path d="M51 106 v-7 a5 5 0 0 1 10 0 v7z"/><path d="M51 140 v-8 a5 5 0 0 1 10 0 v8z"/>
+        <path d="M139 88 v-9 a5 5 0 0 1 10 0 v9z"/><path d="M139 106 v-7 a5 5 0 0 1 10 0 v7z"/><path d="M139 140 v-8 a5 5 0 0 1 10 0 v8z"/>
+      </g>
+      <!-- pointed roofs with corner turrets -->
+      <g fill="#4263eb" stroke="#233c9c" stroke-width="3" stroke-linejoin="round">
+        <path d="M44 45 L56 14 L68 45 Z"/><path d="M132 45 L144 14 L156 45 Z"/>
+        <path d="M38 48 L42 30 L46 48 Z"/><path d="M66 48 L70 30 L74 48 Z"/>
+        <path d="M126 48 L130 30 L134 48 Z"/><path d="M154 48 L158 30 L162 48 Z"/>
+      </g>
+      <g fill="#ffd43b"><circle cx="56" cy="12" r="3.2"/><circle cx="144" cy="12" r="3.2"/></g>
+    </symbol>
+
+    <!-- 4. Cute white bunny (小兔子乖乖) with long pink-lined ears -->
+    <symbol id="pic-bunny" viewBox="0 0 200 200">
+      <!-- long ears -->
+      <g stroke="#7d6f66" stroke-width="5">
+        <ellipse cx="70" cy="58" rx="21" ry="50" transform="rotate(-12 70 58)" fill="url(#g-bunny)"/>
+        <ellipse cx="130" cy="58" rx="21" ry="50" transform="rotate(12 130 58)" fill="url(#g-bunny)"/>
+      </g>
+      <g fill="#ffb3cf">
+        <ellipse cx="70" cy="62" rx="10" ry="36" transform="rotate(-12 70 62)"/>
+        <ellipse cx="130" cy="62" rx="10" ry="36" transform="rotate(12 130 62)"/>
+      </g>
+      <!-- round head -->
+      <ellipse cx="100" cy="130" rx="64" ry="56" fill="url(#g-bunny)" stroke="#7d6f66" stroke-width="5"/>
+      <!-- big shiny eyes -->
+      <g fill="#343a40"><circle cx="77" cy="122" r="9"/><circle cx="123" cy="122" r="9"/></g>
+      <g fill="#fff"><circle cx="80" cy="118" r="3.2"/><circle cx="126" cy="118" r="3.2"/></g>
+      <!-- rosy cheeks -->
+      <ellipse cx="60" cy="145" rx="11" ry="7" fill="#ff8fab" opacity=".7"/>
+      <ellipse cx="140" cy="145" rx="11" ry="7" fill="#ff8fab" opacity=".7"/>
+      <!-- pink nose, smiling mouth and two little teeth -->
+      <path d="M92 137 Q100 132 108 137 Q104 145 100 146 Q96 145 92 137 Z" fill="#ff6b9e" stroke="#c2255c" stroke-width="2.5" stroke-linejoin="round"/>
+      <rect x="94" y="152" width="12" height="10" rx="2.5" fill="#fff" stroke="#7d6f66" stroke-width="2.5"/>
+      <line x1="100" y1="152" x2="100" y2="162" stroke="#7d6f66" stroke-width="2"/>
+      <path d="M100 146 V152 M100 152 Q92 158 85 152 M100 152 Q108 158 115 152" fill="none" stroke="#7d6f66" stroke-width="3.5" stroke-linecap="round"/>
+      <!-- whiskers -->
+      <g stroke="#adb5bd" stroke-width="2.5" stroke-linecap="round">
+        <path d="M70 150 L40 144"/><path d="M70 156 L42 160"/><path d="M130 150 L160 144"/><path d="M130 156 L158 160"/>
+      </g>
+      <!-- little pink bow between the ears -->
+      <g fill="#ff6b9e" stroke="#c2255c" stroke-width="2.5" stroke-linejoin="round">
+        <path d="M100 82 L82 72 L84 94 Z"/><path d="M100 82 L118 72 L116 94 Z"/><circle cx="100" cy="83" r="6"/>
+      </g>
+    </symbol>
+
+    <!-- 5. One cherry blossom (five pink notched petals) -->
+    <symbol id="pic-sakura" viewBox="0 0 200 200">
+      <g fill="url(#g-petal)" stroke="#e64980" stroke-width="3.5" stroke-linejoin="round">
+        <path id="petal" d="M100 100 C76 86 64 52 84 22 Q92 30 100 38 Q108 30 116 22 C136 52 124 86 100 100 Z"/>
+        <use href="#petal" xlink:href="#petal" transform="rotate(72 100 100)"/>
+        <use href="#petal" xlink:href="#petal" transform="rotate(144 100 100)"/>
+        <use href="#petal" xlink:href="#petal" transform="rotate(216 100 100)"/>
+        <use href="#petal" xlink:href="#petal" transform="rotate(288 100 100)"/>
+      </g>
+      <g stroke="#d6336c" stroke-width="2.5" stroke-linecap="round">
+        <path d="M100 100 L100 72 M100 100 L126.6 91.3 M100 100 L116.5 122.7 M100 100 L83.5 122.7 M100 100 L73.4 91.3"/>
+        <path d="M100 100 L113 76 M100 100 L124 106 M100 100 L100 127 M100 100 L76 106 M100 100 L87 76" opacity=".8"/>
+      </g>
+      <g fill="#ffd43b" stroke="#f08c00" stroke-width="1.5">
+        <circle cx="100" cy="71" r="4.5"/><circle cx="127.6" cy="91" r="4.5"/><circle cx="117" cy="123.5" r="4.5"/><circle cx="83" cy="123.5" r="4.5"/><circle cx="72.4" cy="91" r="4.5"/>
+        <circle cx="113.5" cy="75" r="3.5"/><circle cx="125" cy="106.5" r="3.5"/><circle cx="100" cy="128" r="3.5"/><circle cx="75" cy="106.5" r="3.5"/><circle cx="86.5" cy="75" r="3.5"/>
+      </g>
+      <circle cx="100" cy="100" r="10" fill="#d6336c"/>
+      <circle cx="97" cy="97" r="3" fill="#fff" opacity=".6"/>
+    </symbol>
+
+    <!-- Goodbye: baby hand in a piano-keys glove -->
+    <clipPath id="clip-palm"><rect x="46" y="112" width="108" height="78" rx="30"/></clipPath>
+    <symbol id="pic-hand" viewBox="0 0 200 240">
+      <!-- chubby baby arm -->
+      <path d="M72 212 Q70 236 76 240 H124 Q130 236 128 212 Z" fill="#ffd8b8" stroke="#e8a27a" stroke-width="3"/>
+      <!-- thumb -->
+      <rect x="18" y="104" width="32" height="62" rx="16" transform="rotate(-42 34 135)" fill="#fff" stroke="#343a40" stroke-width="4"/>
+      <!-- four chubby fingers -->
+      <g fill="#fff" stroke="#343a40" stroke-width="4">
+        <rect x="49" y="66" width="27" height="72" rx="13.5"/>
+        <rect x="75" y="52" width="27" height="86" rx="13.5"/>
+        <rect x="101" y="58" width="27" height="80" rx="13.5"/>
+        <rect x="127" y="78" width="25" height="60" rx="12.5"/>
+      </g>
+      <!-- little fingertip creases -->
+      <g fill="none" stroke="#adb5bd" stroke-width="2.5" stroke-linecap="round">
+        <path d="M56 84 q6.5 4 13 0 M82 70 q6.5 4 13 0 M108 76 q6.5 4 13 0 M133 95 q6 4 12 0"/>
+      </g>
+      <!-- palm -->
+      <rect x="46" y="112" width="108" height="78" rx="30" fill="#fff" stroke="#343a40" stroke-width="4"/>
+      <!-- piano keyboard pattern on the palm -->
+      <g clip-path="url(#clip-palm)">
+        <g stroke="#495057" stroke-width="2.5">
+          <path d="M61 112 V190 M76 112 V190 M91 112 V190 M106 112 V190 M121 112 V190 M136 112 V190"/>
+        </g>
+        <g fill="#212529">
+          <rect x="55" y="110" width="11" height="44" rx="2"/><rect x="71" y="110" width="11" height="44" rx="2"/>
+          <rect x="100" y="110" width="11" height="44" rx="2"/><rect x="116" y="110" width="11" height="44" rx="2"/><rect x="131" y="110" width="11" height="44" rx="2"/>
+        </g>
+      </g>
+      <rect x="46" y="112" width="108" height="78" rx="30" fill="none" stroke="#343a40" stroke-width="4"/>
+      <!-- cuff -->
+      <rect x="58" y="184" width="84" height="32" rx="12" fill="#212529" stroke="#343a40" stroke-width="3"/>
+      <g fill="#fff">
+        <path d="M76 192 v14 a4 3.2 0 1 1 -3 -3 v-11 l9 -2 v3z"/>
+        <path d="M100 191 v15 a4 3.2 0 1 1 -3 -3 v-12z"/>
+        <path d="M122 192 v14 a4 3.2 0 1 1 -3 -3 v-11 l9 -2 v3z"/>
+      </g>
+      <!-- tiny pink heart on the palm -->
+      <path d="M100 176 l-7 -7 a4.5 4.5 0 0 1 7 -5.5 a4.5 4.5 0 0 1 7 5.5z" fill="#ff6b9e"/>
     </symbol>
   </svg>
 
-  <!-- Screen-reader announcements (selected song, play state, song finished) -->
+  <!-- Screen-reader announcements (selected song, play state, song finished, goodbye) -->
   <div id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <!-- ===== Song picker ===== -->
   <main id="picker" class="screen" aria-labelledby="picker-title">
     <h1 id="picker-title"><span lang="en">Pick a song</span> <span class="zh" lang="zh-HK">選一首歌</span></h1>
-    <ul class="songs" aria-label="Songs">
-      <li><button type="button" class="song-btn" data-song="twinkle">
-        <span class="pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use href="#pic-star" xlink:href="#pic-star"/></svg></span>
+    <ul class="songs" aria-label="歌曲 Songs">
+      <li><button type="button" class="song-btn" data-song="bunny">
+        <span class="pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use href="#pic-bunny" xlink:href="#pic-bunny"/></svg></span>
         <span class="label">
-          <span class="sr-only" lang="zh-HK">星星，</span>
-          <span class="zh" lang="zh-HK">一閃一閃小星星</span>
-          <span class="en" lang="en">Twinkle Twinkle Little Star</span>
+          <span class="zh" lang="zh-HK">小兔子乖乖</span>
+          <span class="en" lang="en">Little Bunny</span>
         </span>
       </button></li>
       <li><button type="button" class="song-btn" data-song="row">
@@ -291,12 +543,26 @@
           <span class="en" lang="en">Row Row Row Your Boat</span>
         </span>
       </button></li>
-      <li><button type="button" class="song-btn" data-song="shark">
-        <span class="pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use href="#pic-shark" xlink:href="#pic-shark"/></svg></span>
+      <li><button type="button" class="song-btn" data-song="twinkle">
+        <span class="pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use href="#pic-star" xlink:href="#pic-star"/></svg></span>
         <span class="label">
-          <span class="sr-only" lang="zh-HK">小鯊魚，</span>
-          <span class="zh" lang="zh-HK">鯊魚寶寶</span>
-          <span class="en" lang="en">Baby Shark</span>
+          <span class="sr-only" lang="zh-HK">星星，</span>
+          <span class="zh" lang="zh-HK">一閃一閃小星星</span>
+          <span class="en" lang="en">Twinkle Twinkle Little Star</span>
+        </span>
+      </button></li>
+      <li><button type="button" class="song-btn" data-song="london">
+        <span class="pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use href="#pic-bridge" xlink:href="#pic-bridge"/></svg></span>
+        <span class="label">
+          <span class="zh" lang="zh-HK">倫敦橋</span>
+          <span class="en" lang="en">London Bridge<span class="sr-only"> Is Falling Down</span></span>
+        </span>
+      </button></li>
+      <li><button type="button" class="song-btn" data-song="sakura">
+        <span class="pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use href="#pic-sakura" xlink:href="#pic-sakura"/></svg></span>
+        <span class="label">
+          <span class="zh" lang="zh-HK">櫻花</span>
+          <span class="en" lang="en">Sakura</span>
         </span>
       </button></li>
     </ul>
@@ -305,26 +571,75 @@
   <!-- ===== Play screen ===== -->
   <main id="play" class="screen" hidden>
     <div id="play-area" role="button" tabindex="0" aria-label="Tap to play next note">
-      <div class="big-pic idle" id="big-pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use id="big-pic-use" href="#pic-star" xlink:href="#pic-star"/></svg></div>
+      <div class="big-pic idle" id="big-pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><g id="big-pic-art" data-pic=""></g></svg></div>
       <div class="song-title" id="song-title" aria-hidden="true"></div>
       <div class="lyric" id="lyric" aria-hidden="true"></div>
       <div class="hint" id="hint" aria-hidden="true">Tap anywhere! <span lang="zh-HK">拍一拍！</span></div>
       <div class="progress" aria-hidden="true"><div id="progress-bar"></div></div>
+      <div id="petals" aria-hidden="true"></div>
       <div id="fx" aria-hidden="true"></div>
-      <div class="celebrate" id="celebrate" aria-hidden="true" hidden><div>🎉<br>Hooray! 好叻！</div></div>
+      <div class="celebrate" id="celebrate" aria-hidden="true" hidden><div><svg class="clap-hands" viewBox="0 0 200 150" focusable="false">
+        <!-- two chubby baby hands clapping in time with the applause -->
+        <g class="clap-lines" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round">
+          <path d="M100 8 V26"/><path d="M70 16 L78 32"/><path d="M130 16 L122 32"/>
+        </g>
+        <g class="clap-l"><rect x="52" y="44" width="46" height="72" rx="23" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/>
+          <ellipse cx="54" cy="96" rx="11" ry="20" transform="rotate(-25 54 96)" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/>
+          <path d="M64 58 V78 M75 54 V78 M86 58 V78" stroke="#e8a27a" stroke-width="3" stroke-linecap="round"/>
+          <rect x="60" y="112" width="30" height="30" rx="8" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/></g>
+        <g class="clap-r"><rect x="102" y="44" width="46" height="72" rx="23" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/>
+          <ellipse cx="146" cy="96" rx="11" ry="20" transform="rotate(25 146 96)" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/>
+          <path d="M114 58 V78 M125 54 V78 M136 58 V78" stroke="#e8a27a" stroke-width="3" stroke-linecap="round"/>
+          <rect x="110" y="112" width="30" height="30" rx="8" fill="#ffd8b8" stroke="#c9825a" stroke-width="4"/></g>
+      </svg>🎉<br>Hooray! 好叻！</div></div>
     </div>
-    <button type="button" id="back-btn" aria-label="Back to songs (parent control)" aria-describedby="back-help">
+    <button type="button" id="back-btn" aria-label="返回歌曲列表 Back to songs（家長用 parent control）" aria-describedby="back-help">
       <span aria-hidden="true">✕</span>
     </button>
-    <p id="back-help" class="sr-only">Asks you to confirm before leaving. Sighted parents can also press and hold for 1.5 seconds.</p>
+    <p id="back-help" class="sr-only"><span lang="zh-HK">會先問你確認。</span> <span lang="en">Asks you to confirm before leaving. Sighted parents can also press and hold for 1.5 seconds.</span></p>
 
     <div id="confirm" class="overlay" hidden>
       <div class="panel" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-desc">
         <h2 id="confirm-title">Back to the song list?</h2>
         <p id="confirm-desc" lang="zh-HK">返回歌曲列表？</p>
         <div class="row">
-          <button type="button" id="confirm-yes">Yes, back to songs</button>
-          <button type="button" id="confirm-no">Keep playing</button>
+          <button type="button" id="confirm-yes"><span lang="zh-HK">好，返回</span> <span lang="en">Yes, back to songs</span></button>
+          <button type="button" id="confirm-no"><span lang="zh-HK">繼續玩</span> <span lang="en">Keep playing</span></button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Goodbye screen (after 3 completed songs) ===== -->
+  <main id="goodbye" class="screen" hidden aria-labelledby="bye-title">
+    <div id="goodbye-content">
+      <span class="float-note" aria-hidden="true" style="left:7%;top:13%">♪</span>
+      <span class="float-note" aria-hidden="true" style="right:8%;top:24%;animation-delay:-1.2s">♫</span>
+      <span class="float-note" aria-hidden="true" style="left:8%;top:64%;animation-delay:-2.1s">♩</span>
+    </div>
+    <div class="hand-wrap" aria-hidden="true">
+      <svg viewBox="0 0 200 240" focusable="false">
+        <g class="wave-lines" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round">
+          <path d="M22 60 Q10 80 20 100"/><path d="M8 48 Q-8 80 6 112"/>
+          <path d="M178 60 Q190 80 180 100"/><path d="M192 48 Q208 80 194 112"/>
+        </g>
+        <g class="hand-wave"><use href="#pic-hand" xlink:href="#pic-hand" width="200" height="240"/></g>
+      </svg>
+    </div>
+    <h1 id="bye-title" tabindex="-1"><span class="zh" lang="zh-HK">拜拜！</span><span lang="en">Bye bye!</span></h1>
+    <p class="bye-sub"><span lang="zh-HK">玩咗三首歌，好叻！</span> <span lang="en">Three songs, well done!</span></p>
+    <button type="button" id="again-btn" aria-describedby="again-help">
+      <span aria-hidden="true">↻</span><span lang="zh-HK">再玩過</span> <span lang="en">Play again</span>
+    </button>
+    <p id="again-help" class="sr-only"><span lang="zh-HK">家長用：會先問你確認。</span> <span lang="en">Parent control: asks you to confirm. Sighted parents can also press and hold for 1.5 seconds.</span></p>
+
+    <div id="again-confirm" class="overlay" hidden>
+      <div class="panel" role="alertdialog" aria-modal="true" aria-labelledby="again-title" aria-describedby="again-desc">
+        <h2 id="again-title"><span lang="zh-HK">再玩過？</span> <span lang="en">Play again?</span></h2>
+        <p id="again-desc"><span lang="zh-HK">重新開始，返去揀歌。</span> <span lang="en">Starts over at the song list.</span></p>
+        <div class="row">
+          <button type="button" id="again-yes"><span lang="zh-HK">好，再玩過</span> <span lang="en">Yes, play again</span></button>
+          <button type="button" id="again-no"><span lang="zh-HK">唔使</span> <span lang="en">Not now</span></button>
         </div>
       </div>
     </div>
@@ -338,17 +653,47 @@
      SONG DATA. One tap = one note. Each line: [notes, lyric syllables].
      Notes are scientific pitch names (C5 = the C above middle C).
      Syllables are separated by spaces or hyphens and must match 1:1.
+     A melisma (one syllable over two notes) is written as an extra
+     syllable, e.g. "so-ra-a" = so / ra / a.
      ===================================================================== */
   /*SONGS-START*/
-  function sharkVerse(who) {
-    // "Baby shark, doo doo doo doo doo doo" x3, then "Baby shark!"  (key of G)
-    var line = ['D5 E5 G5 G5 G5 G5 G5 G5 G5', who + ' shark doo doo doo doo doo doo'];
-    return [line, line, line, ['G5 G5 F#5', who + ' shark!']];
-  }
   var SONGS = [
     {
+      // 小兔子乖乖 - Chinese children's song by 黎錦暉 (1920s, from his 《老虎叫門》), popular version as
+      // arranged by 韓德常; standard kindergarten 簡譜 in 1=C: 3 5 1̇ 6 | 5 ‖ 3 5 6 1̇ | 5 ‖ 6 5 3 | 2 ‖ 3 5 3 | 2. 3 | 1 ‖
+      // 6 5 6 5 | 3 6 5 | 5 5 3 2 | 1 | 6̣ 1 2 3 | 1. Two verses; "來" is sung over the last three notes.
+      id: 'bunny', en: 'Little Bunny', zh: '小兔子乖乖', pic: 'bunny', picZh: '小兔子乖乖',
+      colors: [330, 200, 110],
+      lines: [
+        ['E5 G5 C6 A5 G5', '小-兔-子-乖-乖，'],
+        ['E5 G5 A5 C6 G5', '把-門-兒-開-開，'],
+        ['A5 G5 E5 D5', '快-點兒-開-開，'],
+        ['E5 G5 E5 D5 E5 C5', '我-要-進-來-～-～。'],
+        ['A5 G5 A5 G5 E5 A5 G5', '不-開-不-開-我-不-開，'],
+        ['G5 G5 E5 D5 C5', '媽-媽-沒-回-來，'],
+        ['A4 C5 D5 E5 C5', '誰-來-也-不-開。'],
+        ['E5 G5 C6 A5 G5', '小-兔-子-乖-乖，'],
+        ['E5 G5 A5 C6 G5', '把-門-兒-開-開，'],
+        ['A5 G5 E5 D5', '快-點兒-開-開，'],
+        ['E5 G5 E5 D5 E5 C5', '我-要-進-來-～-～。'],
+        ['A5 G5 A5 G5 E5 A5 G5', '就-開-就-開-我-就-開，'],
+        ['G5 G5 E5 D5 C5', '媽-媽-回-來-了，'],
+        ['A4 C5 D5 E5 C5', '這-就-把-門-開。']
+      ]
+    },
+    {
+      id: 'row', en: 'Row Row Row Your Boat', zh: '划艇歌', pic: 'boat', picZh: '小船',
+      colors: [190, 120, 30],
+      lines: [
+        ['C5 C5 C5 D5 E5', 'Row row row your boat'],
+        ['E5 D5 E5 F5 G5', 'Gent-ly down the stream'],
+        ['C6 C6 C6 G5 G5 G5 E5 E5 E5 C5 C5 C5', 'Mer-ri-ly mer-ri-ly mer-ri-ly mer-ri-ly'],
+        ['G5 F5 E5 D5 C5', 'Life is but a dream']
+      ]
+    },
+    {
       id: 'twinkle', en: 'Twinkle Twinkle Little Star', zh: '一閃一閃小星星', pic: 'star', picZh: '星星',
-      colors: [48, 200, 280],
+      colors: [48, 220, 280],
       lines: [
         ['C5 C5 G5 G5 A5 A5 G5', 'Twin-kle twin-kle lit-tle star'],
         ['F5 F5 E5 E5 D5 D5 C5', 'How I won-der what you are'],
@@ -359,32 +704,40 @@
       ]
     },
     {
-      id: 'row', en: 'Row Row Row Your Boat', zh: '划艇歌', pic: 'boat', picZh: '小船',
-      colors: [120, 190, 30],
+      // Traditional English nursery rhyme, one verse (key of C).
+      id: 'london', en: 'London Bridge Is Falling Down', zh: '倫敦橋', pic: 'bridge', picZh: '倫敦橋',
+      colors: [210, 30, 0],
       lines: [
-        ['C5 C5 C5 D5 E5', 'Row row row your boat'],
-        ['E5 D5 E5 F5 G5', 'Gent-ly down the stream'],
-        ['C6 C6 C6 G5 G5 G5 E5 E5 E5 C5 C5 C5', 'Mer-ri-ly mer-ri-ly mer-ri-ly mer-ri-ly'],
-        ['G5 F5 E5 D5 C5', 'Life is but a dream']
+        ['G5 A5 G5 F5 E5 F5 G5', 'Lon-don Bridge is fall-ing down'],
+        ['D5 E5 F5', 'fall-ing down'],
+        ['E5 F5 G5', 'fall-ing down'],
+        ['G5 A5 G5 F5 E5 F5 G5', 'Lon-don Bridge is fall-ing down'],
+        ['D5 G5 E5 C5', 'My fair la-dy']
       ]
     },
     {
-      id: 'shark', en: 'Baby Shark', zh: '鯊魚寶寶', pic: 'shark', picZh: '小鯊魚',
-      colors: [210, 330, 180],
-      lines: [].concat(
-        sharkVerse('Ba-by'),
-        sharkVerse('Mom-my'),
-        sharkVerse('Dad-dy'),
-        sharkVerse('Grand-ma'),
-        sharkVerse('Grand-pa')
-      )
+      // さくら さくら - traditional Japanese song (Edo-period koto tune, published 1888), one verse.
+      id: 'sakura', en: 'Sakura', zh: '櫻花', pic: 'sakura', picZh: '櫻花',
+      colors: [330, 300, 130],
+      lines: [
+        ['A5 A5 B5 A5 A5 B5', 'Sa-ku-ra sa-ku-ra'],
+        ['A5 B5 C6 B5 A5 B5 A5 F5', 'ya-yo-i no so-ra-a wa'],
+        ['E5 C5 E5 F5 E5 E5 C5 B4', 'mi-wa-ta-su ka-gi-i ri'],
+        ['A5 B5 C6 B5 A5 B5 A5 F5', 'ka-su-mi ka ku-mo-o ka'],
+        ['E5 C5 E5 F5 E5 E5 C5 B4', 'ni-o-i zo i-zu-u ru'],
+        ['A5 A5 B5 A5 A5 B5', 'i-za-ya i-za-ya'],
+        ['E5 F5 B5 A5 F5 E5', 'mi-ni yu-u ka-n']
+      ]
     }
   ];
   /*SONGS-END*/
 
-  var HOLD_MS = 1500;          // long-press length for the back control
-  var CELEBRATION_MS = 2400;   // celebration length before the song restarts
+  var HOLD_MS = 1500;          // long-press length for the parent controls
+  var CELEBRATION_MS = 3300;   // cheer + applause length before returning to the song list
+  var ROUNDS_TO_END = 3;       // completed songs before the goodbye screen
   var CLICK_DEDUPE_MS = 700;   // ignore the synthetic click that follows a real tap
+  var VOICE_FILES = { hooray: 'hooray.wav', bye: 'byebye.wav' };
+  var VOICE_TEXT = { hooray: 'Hooray!', bye: 'Bye bye!' };
 
   /* ---------- helpers ---------- */
   var SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -419,12 +772,16 @@
 
   function $(id) { return document.getElementById(id); }
   var picker = $('picker'), play = $('play'), playArea = $('play-area'), fx = $('fx'),
-      bigPic = $('big-pic'), bigPicUse = $('big-pic-use'), songTitle = $('song-title'), lyric = $('lyric'), hint = $('hint'),
+      bigPic = $('big-pic'), bigPicArt = $('big-pic-art'), petals = $('petals'), songTitle = $('song-title'), lyric = $('lyric'), hint = $('hint'),
       progressBar = $('progress-bar'), celebrateEl = $('celebrate'), backBtn = $('back-btn'),
       confirmEl = $('confirm'), confirmYes = $('confirm-yes'), confirmNo = $('confirm-no'),
+      goodbye = $('goodbye'), byeTitle = $('bye-title'), againBtn = $('again-btn'),
+      againConfirm = $('again-confirm'), againYes = $('again-yes'), againNo = $('again-no'),
       announcer = $('announcer');
 
   function now() { return (window.performance && performance.now) ? performance.now() : Date.now(); }
+  function zh(t) { return '<span lang="zh-HK">' + t + '</span>'; }
+  function en(t) { return '<span lang="en">' + t + '</span>'; }
 
   var announceTimer = 0;
   function announce(html) {
@@ -435,9 +792,10 @@
   }
 
   /* =====================================================================
-     AUDIO: Web Audio "music box / soft piano" synth
+     AUDIO: Web Audio "music box / soft piano" synth, applause, voices
      ===================================================================== */
   var ctx = null, master = null;
+  var stats = { tonesPlayed: 0, claps: 0, applause: 0, voice: { hooray: 0, bye: 0 }, voiceVia: [], pickerSpeech: [] };
   function ensureAudio() {
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
@@ -455,6 +813,7 @@
         var buf = ctx.createBuffer(1, 1, 22050), src = ctx.createBufferSource();
         src.buffer = buf; src.connect(ctx.destination); src.start(0);
       } catch (e) { /* ignore */ }
+      decodeVoices();
     }
     if (ctx.state !== 'running' && ctx.resume) {
       try { var p = ctx.resume(); if (p && p.catch) p.catch(function () {}); } catch (e) { /* ignore */ }
@@ -469,7 +828,6 @@
     [3, 0.12, 'triangle', 0.35],
     [4.01, 0.06, 'sine', 0.12]   // tiny bright "tine" for the pluck
   ];
-  var stats = { tonesPlayed: 0 };
   function playTone(freq, when, vel, dur) {
     if (!ctx || !master) return;
     vel = vel == null ? 1 : vel; dur = dur || 1.4;
@@ -497,19 +855,156 @@
   function playCelebrationSound() {
     if (!ctx) return;
     var t = ctx.currentTime + 0.02;
-    // Rising sparkly arpeggio, then a bright chord.
+    // Short sparkly arpeggio (kept soft so the "Hooray" voice stays clear).
     ['C6', 'E6', 'G6', 'C7', 'G6', 'C7', 'E7'].forEach(function (n, i) {
-      playTone(noteToFreq(n), t + i * 0.09, 0.55, 0.9);
+      playTone(noteToFreq(n), t + i * 0.08, 0.32, 0.8);
     });
-    ['C6', 'E6', 'G6', 'C7'].forEach(function (n) { playTone(noteToFreq(n), t + 0.72, 0.4, 1.6); });
+    ['C6', 'E6', 'G6', 'C7'].forEach(function (n) { playTone(noteToFreq(n), t + 0.6, 0.22, 1.4); });
+  }
+
+  /* ---- Applause: a small crowd of clappers made from filtered noise bursts ---- */
+  var noiseBuf = null;
+  function getNoise() {
+    if (!noiseBuf) {
+      var len = Math.floor(ctx.sampleRate * 1.0);
+      noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+      var d = noiseBuf.getChannelData(0);
+      for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return noiseBuf;
+  }
+  function playApplause(dur, delay) {
+    if (!ctx || !master) return;
+    dur = dur || 2.2;
+    var t0 = ctx.currentTime + (delay || 0.02), end = t0 + dur, noise = getNoise();
+    var bus = ctx.createGain(); bus.gain.value = 0.9;
+    var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 350;
+    bus.connect(hp); hp.connect(master);
+    function clap(t, fc, vel) {
+      var src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+      src.buffer = noise;
+      bp.type = 'bandpass'; bp.frequency.value = fc; bp.Q.value = 0.9 + Math.random() * 0.8;
+      var len = 0.05 + Math.random() * 0.05;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vel, t + 0.0025);
+      g.gain.exponentialRampToValueAtTime(vel * 0.25, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      src.connect(bp); bp.connect(g); g.connect(bus);
+      src.start(t, Math.random() * 0.8, len + 0.02);
+      stats.claps++;
+    }
+    var clappers = 11;
+    for (var c = 0; c < clappers; c++) {
+      var rate = 3.6 + Math.random() * 2.6;          // claps per second for this person
+      var fc = 800 + Math.random() * 1900;           // each person's hands sound a bit different
+      var t = t0 + Math.random() * 0.2;
+      while (t < end) {
+        var x = (t - t0) / dur;                      // swell quickly, fade out over the last 35 %
+        var env = x < 0.1 ? 0.45 + 5.5 * x : x > 0.65 ? Math.max(0.02, (1 - x) / 0.35) : 1;
+        clap(t, fc * (0.9 + Math.random() * 0.2), 0.34 * env * (0.6 + Math.random() * 0.4));
+        t += (1 / rate) * (0.85 + Math.random() * 0.3);
+      }
+    }
+    setTimeout(function () { try { bus.disconnect(); hp.disconnect(); } catch (e) { /* ignore */ } }, (dur + 1) * 1000);
+    stats.applause++;
+  }
+
+  /* ---- Pre-recorded voices ("Hooray!", "Bye bye!") bundled with the app ---- */
+  var voices = {};
+  Object.keys(VOICE_FILES).forEach(function (k) { voices[k] = { data: null, buffer: null, state: 'loading' }; });
+  function decodeVoices() {
+    if (!ctx) return;
+    Object.keys(voices).forEach(function (k) {
+      var v = voices[k];
+      if (!v.data || v.buffer || v.decoding) return;
+      v.decoding = true;
+      var done = false;
+      var ok = function (b) { if (done) return; done = true; v.buffer = b; v.state = 'ready'; };
+      var bad = function () { if (done) return; done = true; v.state = 'failed'; };
+      try {
+        var p = ctx.decodeAudioData(v.data.slice(0), ok, bad);
+        if (p && p.then) p.then(ok, bad);
+      } catch (e) { bad(); }
+    });
+  }
+  if (window.fetch && /^https?:$/.test(location.protocol)) {
+    Object.keys(VOICE_FILES).forEach(function (k) {
+      fetch(VOICE_FILES[k]).then(function (r) { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+        .then(function (ab) { voices[k].data = ab; voices[k].state = 'fetched'; decodeVoices(); })
+        .catch(function () { voices[k].state = 'failed'; });
+    });
+  } else {
+    Object.keys(voices).forEach(function (k) { voices[k].state = 'failed'; });
+  }
+  function speakFallback(k) {
+    try {
+      if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return false;
+      var u = new SpeechSynthesisUtterance(VOICE_TEXT[k]);
+      u.lang = 'en-US'; u.pitch = 1.9; u.rate = 0.95; u.volume = 1;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+      return true;
+    } catch (e) { return false; }
+  }
+  /* ---------- picker: say the picture word (Cantonese, then English) when a song icon is tapped ----------
+     Edit the words here. yue = Cantonese (spoken with a zh-HK voice), en = English. */
+  var PICKER_WORDS = {
+    bunny:   { yue: '小兔子', en: 'rabbit' },
+    row:     { yue: '船仔',   en: 'boat' },
+    twinkle: { yue: '星星',   en: 'star' },
+    london:  { yue: '橋',     en: 'bridge' },
+    sakura:  { yue: '櫻花',   en: 'sakura' }
+  };
+  var ttsVoices = { yue: null, en: null };
+  function pickTtsVoices() {
+    try {
+      var vs = speechSynthesis.getVoices() || [], norm = function (v) { return String(v.lang || '').replace('_', '-').toLowerCase(); };
+      ttsVoices.yue = vs.filter(function (v) { return norm(v) === 'zh-hk' || /^yue/.test(norm(v)); })[0] || null;
+      ttsVoices.en = vs.filter(function (v) { return norm(v) === 'en-gb'; })[0] || vs.filter(function (v) { return norm(v) === 'en-us'; })[0] || null;
+    } catch (e) { /* ignore */ }
+  }
+  if (window.speechSynthesis) {
+    pickTtsVoices();
+    try { speechSynthesis.addEventListener('voiceschanged', pickTtsVoices); } catch (e) { /* ignore */ }
+  }
+  function speakPickerWord(id) {
+    // Called synchronously inside the tap/click handler (iOS Safari only speaks from a user gesture).
+    var w = PICKER_WORDS[id];
+    if (!w || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+    try {
+      if (!ttsVoices.yue && !ttsVoices.en) pickTtsVoices();
+      speechSynthesis.cancel();
+      var a = new SpeechSynthesisUtterance(w.yue);
+      a.lang = 'zh-HK'; if (ttsVoices.yue) a.voice = ttsVoices.yue;
+      a.rate = 0.9; a.pitch = 1.25; a.volume = 1;
+      var b = new SpeechSynthesisUtterance(w.en);
+      b.lang = ttsVoices.en ? ttsVoices.en.lang.replace('_', '-') : 'en-GB'; if (ttsVoices.en) b.voice = ttsVoices.en;
+      b.rate = 0.9; b.pitch = 1.25; b.volume = 1;
+      speechSynthesis.speak(a); speechSynthesis.speak(b);
+      stats.pickerSpeech.push(id);
+    } catch (e) { /* speech is a bonus - never break the app */ }
+  }
+  function playVoice(k, delay) {
+    var v = voices[k];
+    stats.voice[k]++;
+    if (ctx && master && v && v.buffer) {
+      var src = ctx.createBufferSource(), g = ctx.createGain();
+      src.buffer = v.buffer; g.gain.value = 1.15;
+      src.connect(g); g.connect(master);
+      src.start(ctx.currentTime + (delay || 0));
+      stats.voiceVia.push(k + ':file');
+      return;
+    }
+    var said = false;
+    var go = function () { said = speakFallback(k); stats.voiceVia.push(k + (said ? ':speech' : ':none')); };
+    if (delay) setTimeout(go, delay * 1000); else go();
   }
 
   /* =====================================================================
      STATE
      ===================================================================== */
-  var state = { screen: 'picker', song: null, index: 0, celebrating: false, loops: 0, lastNote: null, notesPlayed: 0 };
-  var celebrateTimers = [];
-  var lastPointerTime = -1e9, screenChangedAt = -1e9, lastSongBtn = null;
+  var state = { screen: 'picker', song: null, index: 0, celebrating: false, rounds: 0, lastNote: null, notesPlayed: 0 };
+  var celebrateTimers = [], goodbyeTimers = [];
+  var lastPointerTime = -1e9, pickerGuardUntil = -1e9, lastSongBtn = null;
 
   /* ---------- visuals ---------- */
   function randomBright() { return 'hsl(' + Math.floor(Math.random() * 360) + ',95%,' + (55 + Math.floor(Math.random() * 12)) + '%)'; }
@@ -539,6 +1034,48 @@
     bumpFlip = !bumpFlip;
     bigPic.className = 'big-pic ' + (bumpFlip ? 'bump-a' : 'bump-b');
   }
+  /* ---------- per-song theme animations ---------- */
+  // The big picture is an inline copy of the song's <symbol> (not a <use>), so CSS can animate its parts
+  // (oars, water, bridge deck, bus, walkers, star glow) on the play screen only; the picker buttons stay still.
+  function showBigPic(pic) {
+    var sym = document.getElementById('pic-' + pic);
+    bigPicArt.textContent = '';
+    bigPicArt.setAttribute('class', '');
+    if (sym) Array.prototype.forEach.call(sym.childNodes, function (n) {
+      var c = n.cloneNode(true);
+      if (c.nodeType === 1) {
+        c.removeAttribute('id');
+        Array.prototype.forEach.call(c.querySelectorAll('[id]'), function (e) { e.removeAttribute('id'); });
+      }
+      bigPicArt.appendChild(c);
+    });
+    bigPicArt.setAttribute('data-pic', pic);
+  }
+  var glowTimer = 0;
+  function themePulse() {
+    // Twinkle: each tap eases a soft glow up (0.55 s) and then lets it dim slowly (1.2 s). Transitions start from the
+    // current level, so fast tapping just keeps the star gently bright - no abrupt flashing.
+    if (bigPicArt.getAttribute('data-pic') !== 'star') return;
+    bigPicArt.setAttribute('class', 'glow');
+    clearTimeout(glowTimer);
+    glowTimer = setTimeout(function () { bigPicArt.setAttribute('class', ''); }, 600);
+  }
+  (function makePetals() {
+    // Sakura: 14 CSS-animated petals, each with its own start position, breeze drift, sway and tumble speed.
+    for (var k = 0; k < 14; k++) {
+      var f = document.createElement('span'), w = document.createElement('span'), p = document.createElement('span');
+      f.className = 'petal-fall'; w.className = 'petal-sway'; p.className = 'petal';
+      var d = 8 + Math.random() * 5;
+      f.style.setProperty('--x', (-25 + Math.random() * 95).toFixed(1) + '%');
+      f.style.setProperty('--d', d.toFixed(2) + 's');
+      f.style.setProperty('--delay', (-Math.random() * d).toFixed(2) + 's');
+      f.style.setProperty('--drift', (22 + Math.random() * 22).toFixed(1) + 'vw');
+      w.style.setProperty('--sw', (1.4 + Math.random() * 1.2).toFixed(2) + 's');
+      p.style.setProperty('--size', (20 + Math.random() * 14).toFixed(0) + 'px');
+      p.style.setProperty('--t', (3 + Math.random() * 3).toFixed(2) + 's');
+      w.appendChild(p); f.appendChild(w); petals.appendChild(f);
+    }
+  })();
   function renderLyric(playedIndex) {
     var s = state.song; if (!s) return;
     var li = playedIndex >= 0 ? s.lineOf[playedIndex] : 0;
@@ -569,29 +1106,33 @@
     state.index = i + 1;
     hint.hidden = true;
     renderLyric(i);
-    bump(); flashBackground();
+    bump(); flashBackground(); themePulse();
     if (state.index >= s.notes.length) celebrate();
   }
 
   function celebrate() {
     state.celebrating = true;
+    state.rounds++;                                   // a completed song counts as one round
+    var finalRound = state.rounds >= ROUNDS_TO_END, song = state.song;
+    playVoice('hooray', 0.45);                        // scheduled inside the tap gesture
     celebrateTimers.push(setTimeout(function () {
       playCelebrationSound();
+      playApplause(2.2, 0.35);           // applause starts just after the "Hooray!"
       celebrateEl.hidden = false;
       var r = playArea.getBoundingClientRect();
-      for (var k = 0; k < 22; k++) {
+      for (var k = 0; k < 24; k++) {
         (function (k) {
           celebrateTimers.push(setTimeout(function () {
             spawnSpark(r.left + Math.random() * r.width, r.top + Math.random() * r.height, true);
-          }, k * 45));
+          }, k * 60));
         })(k);
       }
-      announce('Hooray! You finished ' + state.song.en + '. Starting again.');
+      announce(zh('好叻！') + ' ' + en('Hooray! You finished ' + song.en + '.') + ' ' +
+        (finalRound ? '' : zh('完成 ' + state.rounds + ' 首。') + ' ' + en(state.rounds + ' of ' + ROUNDS_TO_END + ' songs done.')));
     }, 350));
     celebrateTimers.push(setTimeout(function () {
-      celebrateEl.hidden = true;
-      state.index = 0; state.loops++; state.celebrating = false;
-      renderLyric(-1);
+      celebrateEl.hidden = true; state.celebrating = false;
+      if (finalRound) goToGoodbye(); else goToPicker({ auto: true });
     }, CELEBRATION_MS));
   }
   function clearCelebration() {
@@ -610,48 +1151,80 @@
       }
     } catch (e) { /* ignore */ }
   }
+  function focusEl(el) { try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
 
   function startSong(id, btn) {
     var s = SONG_BY_ID[id]; if (!s) return;
     ensureAudio(); // inside the tap/click handler: unlocks audio on iOS
     clearCelebration();
-    state.song = s; state.index = 0; state.lastNote = null; state.loops = 0; state.screen = 'play';
+    state.song = s; state.index = 0; state.lastNote = null; state.screen = 'play';
     lastSongBtn = btn || null;
-    screenChangedAt = now();
-    bigPicUse.setAttribute('href', '#pic-' + s.pic);
-    bigPicUse.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#pic-' + s.pic);
+    showBigPic(s.pic);
+    playArea.setAttribute('data-song', s.id);
     bigPic.className = 'big-pic idle';
     songTitle.innerHTML = '';
     songTitle.appendChild(document.createTextNode(s.en + ' · '));
-    var zh = document.createElement('span'); zh.lang = 'zh-HK'; zh.textContent = s.zh; songTitle.appendChild(zh);
+    var z = document.createElement('span'); z.lang = 'zh-HK'; z.textContent = s.zh; songTitle.appendChild(z);
     playArea.style.backgroundColor = 'hsl(' + s.colors[0] + ',85%,58%)';
-    playArea.setAttribute('aria-label', s.picZh + '，' + s.zh + '. ' + s.en + '. Tap to play next note.');
+    playArea.setAttribute('aria-label', s.picZh + '，' + s.zh + '. ' + s.en + '. 拍一拍 Tap to play next note.');
     fx.textContent = '';
     hint.hidden = false;
     renderLyric(-1);
-    picker.hidden = true; play.hidden = false; confirmEl.hidden = true;
+    picker.hidden = true; goodbye.hidden = true; play.hidden = false; confirmEl.hidden = true;
     document.body.classList.add('playing');
-    try { playArea.focus({ preventScroll: true }); } catch (e) { playArea.focus(); }
-    announce('Playing <span lang="zh-HK">' + s.picZh + '，' + s.zh + '</span>, <span lang="en">' + s.en + '</span>. Tap anywhere to play the next note.');
+    focusEl(playArea);
+    announce('Playing ' + zh(s.picZh === s.zh ? s.zh : s.picZh + '，' + s.zh) + ', ' + en(s.en) + '. ' + zh('拍一拍。') + ' ' + en('Tap anywhere to play the next note.'));
     keepAwake(true);
   }
 
-  function goToPicker() {
-    clearCelebration(); cancelHold(); closeConfirm(true);
+  function goToPicker(opts) {
+    opts = opts || {};
+    clearCelebration(); cancelAllHolds(); closeConfirm(true); closeAgain(true);
+    goodbyeTimers.forEach(clearTimeout); goodbyeTimers = [];
     state.screen = 'picker'; state.song = null; state.index = 0;
-    screenChangedAt = now();
-    play.hidden = true; picker.hidden = false;
+    // After an automatic return, ignore taps for a moment so a toddler still tapping
+    // the play screen does not start a song by accident.
+    pickerGuardUntil = now() + (opts.auto ? 1200 : 500);
+    play.hidden = true; goodbye.hidden = true; picker.hidden = false;
     document.body.classList.remove('playing');
-    var target = lastSongBtn || picker.querySelector('.song-btn');
-    try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
-    announce('Song list. Choose a song.');
+    var target = (opts.reset ? null : lastSongBtn) || picker.querySelector('.song-btn');
+    focusEl(target);
+    if (opts.auto) {
+      var left = ROUNDS_TO_END - state.rounds;
+      announce(zh('歌曲列表。揀下一首歌。') + ' ' + en('Song list. Choose the next song.') + ' ' +
+        zh('仲有 ' + left + ' 首。') + ' ' + en(left + (left === 1 ? ' song' : ' songs') + ' to go.'));
+    } else if (opts.reset) {
+      announce(zh('再玩過！揀一首歌。') + ' ' + en('Play again! Song list. Choose a song.'));
+    } else {
+      announce(zh('歌曲列表。') + ' ' + en('Song list. Choose a song.'));
+    }
     keepAwake(false);
+  }
+
+  function goToGoodbye() {
+    clearCelebration(); cancelAllHolds(); closeConfirm(true); closeAgain(true);
+    state.screen = 'goodbye'; state.song = null; state.index = 0;
+    play.hidden = true; picker.hidden = true; goodbye.hidden = false;
+    document.body.classList.remove('playing');
+    focusEl(byeTitle);
+    announce(zh('拜拜！') + ' ' + en('Bye bye!') + ' ' + zh('玩咗三首歌。家長可以用右上角「再玩過」掣。') + ' ' +
+      en('Three songs played. Parents: the Play again button is at the top right.'));
+    ensureAudio();
+    playVoice('bye', 0.3);
+    goodbyeTimers.push(setTimeout(function () { if (state.screen === 'goodbye') playVoice('bye', 0); }, 2300));
+    keepAwake(false);
+  }
+
+  function playAgain() {
+    state.rounds = 0;
+    goToPicker({ reset: true });
   }
 
   /* ---------- picker events ---------- */
   Array.prototype.forEach.call(document.querySelectorAll('.song-btn'), function (btn) {
     btn.addEventListener('click', function () {
-      if (now() - screenChangedAt < 500) return; // ignore a stray tap that lands right after leaving play
+      if (now() < pickerGuardUntil) return; // ignore a stray tap that lands right after leaving play
+      speakPickerWord(btn.getAttribute('data-song'));
       startSong(btn.getAttribute('data-song'), btn);
     });
   });
@@ -689,90 +1262,105 @@
       var c = centre(); advance(c[0], c[1]);
     }
   });
+  // Goodbye screen: swallow taps (no zoom / callouts), and use a touch to (re)unlock audio.
+  goodbye.addEventListener('touchstart', function (e) { if (e.target === againBtn || againBtn.contains(e.target) || againConfirm.contains(e.target)) return; if (e.cancelable) e.preventDefault(); ensureAudio(); }, { passive: false });
 
-  /* ---------- back control: hold 1.5 s, or tap -> confirm dialog ---------- */
-  var holdTimer = 0, holdRaf = 0, holdStart = 0, holding = false, holdDone = false, suppressBackClickUntil = 0;
-  function setRing(p) { backBtn.style.setProperty('--p', p.toFixed(3)); }
-  function holdTick() {
-    if (!holding) return;
-    setRing(Math.min(1, (now() - holdStart) / HOLD_MS));
-    holdRaf = requestAnimationFrame(holdTick);
-  }
-  function cancelHold() {
-    holding = false; clearTimeout(holdTimer); cancelAnimationFrame(holdRaf); setRing(0);
-  }
-  backBtn.addEventListener('pointerdown', function (e) {
-    e.stopPropagation();
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    ensureAudio();
-    holding = true; holdDone = false; holdStart = now();
-    try { backBtn.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
-    holdTimer = setTimeout(function () { holding = false; holdDone = true; suppressBackClickUntil = now() + CLICK_DEDUPE_MS; goToPicker(); }, HOLD_MS);
-    holdRaf = requestAnimationFrame(holdTick);
-  });
-  backBtn.addEventListener('pointerup', function (e) {
-    e.stopPropagation();
-    if (!holding) return;
-    cancelHold();
-    suppressBackClickUntil = now() + CLICK_DEDUPE_MS;
-    if (!holdDone) openConfirm();
-  });
-  backBtn.addEventListener('pointercancel', cancelHold);
-  // Suppress compatibility mouse events / ghost clicks and the iOS long-press callout on touch.
-  backBtn.addEventListener('touchstart', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
-  backBtn.addEventListener('touchend', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
-  backBtn.addEventListener('contextmenu', function (e) { e.preventDefault(); });
-  backBtn.addEventListener('click', function (e) {
-    // Keyboard / VoiceOver activation (no pointer sequence) opens the confirm dialog.
-    e.stopPropagation();
-    if (now() < suppressBackClickUntil) return;
-    openConfirm();
-  });
-
-  var confirmOpenedAt = 0;
-  function openConfirm() {
-    if (state.screen !== 'play' || !confirmEl.hidden) return;
-    confirmOpenedAt = now();
-    confirmEl.hidden = false;
-    playArea.setAttribute('aria-hidden', 'true'); backBtn.setAttribute('aria-hidden', 'true');
-    playArea.inert = true; backBtn.inert = true;
-    try { confirmYes.focus({ preventScroll: true }); } catch (e) { confirmYes.focus(); }
-  }
-  function closeConfirm(silent) {
-    if (confirmEl.hidden) return;
-    confirmEl.hidden = true;
-    playArea.removeAttribute('aria-hidden'); backBtn.removeAttribute('aria-hidden');
-    playArea.inert = false; backBtn.inert = false;
-    if (!silent) { try { playArea.focus({ preventScroll: true }); } catch (e) { playArea.focus(); } }
-  }
-  confirmYes.addEventListener('click', function () { goToPicker(); });
-  confirmNo.addEventListener('click', function () { closeConfirm(false); });
-  // A tap on the dimmed background (not the panel) just closes the dialog - toddler-safe.
-  confirmEl.addEventListener('pointerdown', function (e) {
-    if (e.target !== confirmEl) return;
-    e.preventDefault();
-    if (now() - confirmOpenedAt < 350) return;
-    closeConfirm(false);
-  });
-  confirmEl.addEventListener('touchstart', function (e) { if (e.target === confirmEl && e.cancelable) e.preventDefault(); }, { passive: false });
-  confirmEl.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { e.preventDefault(); closeConfirm(false); }
-    else if (e.key === 'Tab') { // keep focus inside the dialog
-      e.preventDefault();
-      (document.activeElement === confirmYes ? confirmNo : confirmYes).focus();
+  /* ---------- parent controls: hold 1.5 s, or tap -> confirm dialog ---------- */
+  var holdCancels = [];
+  function cancelAllHolds() { holdCancels.forEach(function (f) { f(); }); }
+  function parentControl(btn, onHold, onTap) {
+    var holdTimer = 0, holdRaf = 0, holdStart = 0, holding = false, holdDone = false, suppressClickUntil = 0;
+    function setRing(p) { btn.style.setProperty('--p', p.toFixed(3)); }
+    function tick() {
+      if (!holding) return;
+      setRing(Math.min(1, (now() - holdStart) / HOLD_MS));
+      holdRaf = requestAnimationFrame(tick);
     }
-  });
+    function cancel() { holding = false; clearTimeout(holdTimer); cancelAnimationFrame(holdRaf); setRing(0); }
+    holdCancels.push(cancel);
+    btn.addEventListener('pointerdown', function (e) {
+      e.stopPropagation();
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      ensureAudio();
+      holding = true; holdDone = false; holdStart = now();
+      try { btn.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      holdTimer = setTimeout(function () { holding = false; holdDone = true; suppressClickUntil = now() + CLICK_DEDUPE_MS; setRing(0); onHold(); }, HOLD_MS);
+      holdRaf = requestAnimationFrame(tick);
+    });
+    btn.addEventListener('pointerup', function (e) {
+      e.stopPropagation();
+      if (!holding) return;
+      cancel();
+      suppressClickUntil = now() + CLICK_DEDUPE_MS;
+      if (!holdDone) onTap();
+    });
+    btn.addEventListener('pointercancel', cancel);
+    // Suppress compatibility mouse events / ghost clicks and the iOS long-press callout on touch.
+    btn.addEventListener('touchstart', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+    btn.addEventListener('touchend', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+    btn.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    btn.addEventListener('click', function (e) {
+      // Keyboard / VoiceOver activation (no pointer sequence) opens the confirm dialog.
+      e.stopPropagation();
+      if (now() < suppressClickUntil) return;
+      onTap();
+    });
+  }
+
+  /* ---------- toddler-safe confirm dialogs ---------- */
+  function makeDialog(overlay, yes, no, behind, isAllowed) {
+    var openedAt = 0;
+    function open() {
+      if (!isAllowed() || !overlay.hidden) return;
+      openedAt = now();
+      overlay.hidden = false;
+      behind.forEach(function (el) { el.setAttribute('aria-hidden', 'true'); el.inert = true; });
+      focusEl(yes);
+    }
+    function close(silent) {
+      if (overlay.hidden) return;
+      overlay.hidden = true;
+      behind.forEach(function (el) { el.removeAttribute('aria-hidden'); el.inert = false; });
+      if (!silent) focusEl(behind[0]);
+    }
+    no.addEventListener('click', function () { close(false); });
+    // A tap on the dimmed background (not the panel) just closes the dialog - toddler-safe.
+    overlay.addEventListener('pointerdown', function (e) {
+      if (e.target !== overlay) return;
+      e.preventDefault();
+      if (now() - openedAt < 350) return;
+      close(false);
+    });
+    overlay.addEventListener('touchstart', function (e) { if (e.target === overlay && e.cancelable) e.preventDefault(); }, { passive: false });
+    overlay.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); close(false); }
+      else if (e.key === 'Tab') { // keep focus inside the dialog
+        e.preventDefault();
+        focusEl(document.activeElement === yes ? no : yes);
+      }
+    });
+    return { open: open, close: close };
+  }
+  var backDialog = makeDialog(confirmEl, confirmYes, confirmNo, [playArea, backBtn], function () { return state.screen === 'play'; });
+  var againDialog = makeDialog(againConfirm, againYes, againNo, [byeTitle, againBtn], function () { return state.screen === 'goodbye'; });
+  function closeConfirm(silent) { backDialog.close(silent); }
+  function closeAgain(silent) { againDialog.close(silent); }
+  confirmYes.addEventListener('click', function () { goToPicker(); });
+  againYes.addEventListener('click', function () { playAgain(); });
+  parentControl(backBtn, function () { goToPicker(); }, backDialog.open);
+  parentControl(againBtn, function () { playAgain(); }, againDialog.open);
 
   /* ---------- global guards (no zoom, no selection, no context menu while playing) ---------- */
-  // Pinch-zoom is blocked on the play screen only (touch-action:none + Safari gesture events);
+  // Pinch-zoom is blocked on the play and goodbye screens only (touch-action:none + Safari gesture events);
   // the song list stays zoomable for low-vision grown-ups.
+  function locked() { return state.screen === 'play' || state.screen === 'goodbye'; }
   ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (t) {
-    document.addEventListener(t, function (e) { if (state.screen === 'play') e.preventDefault(); }, { passive: false });
+    document.addEventListener(t, function (e) { if (locked()) e.preventDefault(); }, { passive: false });
   });
-  document.addEventListener('contextmenu', function (e) { if (state.screen === 'play') e.preventDefault(); });
-  document.addEventListener('selectstart', function (e) { if (state.screen === 'play') e.preventDefault(); });
-  document.addEventListener('dblclick', function (e) { if (state.screen === 'play') e.preventDefault(); }, { passive: false });
-  document.addEventListener('touchmove', function (e) { if (state.screen === 'play' && e.cancelable) e.preventDefault(); }, { passive: false });
+  document.addEventListener('contextmenu', function (e) { if (locked()) e.preventDefault(); });
+  document.addEventListener('selectstart', function (e) { if (locked()) e.preventDefault(); });
+  document.addEventListener('dblclick', function (e) { if (locked()) e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove', function (e) { if (locked() && e.cancelable) e.preventDefault(); }, { passive: false });
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible' && state.screen === 'play') { wakeLock = null; keepAwake(true); }
   });
@@ -786,13 +1374,15 @@
   window.ToddlerMusic = {
     songs: SONGS,
     noteToFreq: noteToFreq,
-    HOLD_MS: HOLD_MS, CELEBRATION_MS: CELEBRATION_MS,
+    HOLD_MS: HOLD_MS, CELEBRATION_MS: CELEBRATION_MS, ROUNDS_TO_END: ROUNDS_TO_END,
     getState: function () {
       return {
         screen: state.screen, songId: state.song ? state.song.id : null, index: state.index,
-        total: state.song ? state.song.notes.length : 0, celebrating: state.celebrating, loops: state.loops,
+        total: state.song ? state.song.notes.length : 0, celebrating: state.celebrating, rounds: state.rounds,
         lastNote: state.lastNote, notesPlayed: state.notesPlayed, tonesPlayed: stats.tonesPlayed,
-        audioState: ctx ? ctx.state : 'none', confirmOpen: !confirmEl.hidden
+        claps: stats.claps, applause: stats.applause, voice: { hooray: stats.voice.hooray, bye: stats.voice.bye },
+        voiceVia: stats.voiceVia.slice(), voiceState: { hooray: voices.hooray.state, bye: voices.bye.state },
+        audioState: ctx ? ctx.state : 'none', confirmOpen: !confirmEl.hidden, againConfirmOpen: !againConfirm.hidden
       };
     }
   };
