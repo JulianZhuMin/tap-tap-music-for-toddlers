@@ -744,7 +744,11 @@
   var CELEBRATION_MS = 3300;   // cheer + applause length before returning to the song list
   var ROUNDS_TO_END = 3;       // completed songs before the goodbye screen
   var CLICK_DEDUPE_MS = 700;   // ignore the synthetic click that follows a real tap
-  var VOICE_FILES = { hooray: 'hooray.wav', bye: 'byebye.wav' };
+  var VOICE_FILES = { hooray: 'hooray.wav', bye: 'byebye.wav',
+    // picture words: Cantonese (edge-tts zh-HK-HiuGaaiNeural) then English (en-US-AnaNeural), pre-recorded
+    'bunny-yue': 'pick-bunny-yue.mp3', 'bunny-en': 'pick-bunny-en.mp3', 'row-yue': 'pick-row-yue.mp3', 'row-en': 'pick-row-en.mp3',
+    'twinkle-yue': 'pick-twinkle-yue.mp3', 'twinkle-en': 'pick-twinkle-en.mp3', 'london-yue': 'pick-london-yue.mp3', 'london-en': 'pick-london-en.mp3',
+    'sakura-yue': 'pick-sakura-yue.mp3', 'sakura-en': 'pick-sakura-en.mp3' };
   var VOICE_TEXT = { hooray: 'Hooray!', bye: 'Bye bye!' };
 
   /* ---------- helpers ---------- */
@@ -803,7 +807,7 @@
      AUDIO: Web Audio "music box / soft piano" synth, applause, voices
      ===================================================================== */
   var ctx = null, master = null;
-  var stats = { tonesPlayed: 0, claps: 0, applause: 0, voice: { hooray: 0, bye: 0 }, voiceVia: [], pickerSpeech: [] };
+  var stats = { tonesPlayed: 0, claps: 0, applause: 0, voice: { hooray: 0, bye: 0 }, voiceVia: [], pickerSpeech: [], pickerPlays: [] };
   function ensureAudio() {
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
@@ -917,7 +921,7 @@
     stats.applause++;
   }
 
-  /* ---- Pre-recorded voices ("Hooray!", "Bye bye!") bundled with the app ---- */
+  /* ---- Pre-recorded voices ("Hooray!", "Bye bye!", and the picture words) bundled with the app ---- */
   var voices = {};
   Object.keys(VOICE_FILES).forEach(function (k) { voices[k] = { data: null, buffer: null, state: 'loading' }; });
   function decodeVoices() {
@@ -954,7 +958,8 @@
     } catch (e) { return false; }
   }
   /* ---------- picker: say the picture word (Cantonese, then English) when a song icon is tapped ----------
-     Edit the words here. yue = Cantonese (spoken with a zh-HK voice), en = English. */
+     The words are pre-recorded (pick-<song>-yue.mp3 / pick-<song>-en.mp3, see VOICE_FILES); the text below is only used
+     by the speech-synthesis fallback if those clips can't load. yue = Cantonese, en = English. */
   var PICKER_WORDS = {
     bunny:   { yue: '小兔子', en: 'rabbit' },
     row:     { yue: '船仔',   en: 'boat' },
@@ -974,8 +979,47 @@
     pickTtsVoices();
     try { speechSynthesis.addEventListener('voiceschanged', pickTtsVoices); } catch (e) { /* ignore */ }
   }
+  var pickerSrcs = [], pickerTimer = 0;
+  function stopPickerWord() {
+    clearTimeout(pickerTimer);
+    pickerSrcs.forEach(function (x) { try { x.stop(); } catch (e) { /* ignore */ } }); pickerSrcs = [];
+  }
+  // Plays the pre-recorded Cantonese word, then the English word, through Web Audio (unlocked by this same tap on iOS).
+  function playPickerClips(id) {
+    var a = voices[id + '-yue'], b = voices[id + '-en'];
+    if (!(ctx && master && a && b && a.buffer && b.buffer)) return false;
+    stopPickerWord();
+    var t = ctx.currentTime + 0.02, log = { id: id, yue: [t, a.buffer.duration] };
+    [a, b].forEach(function (v, i) {
+      if (i === 1) log.en = [t, v.buffer.duration];
+      var src = ctx.createBufferSource(), g = ctx.createGain();
+      src.buffer = v.buffer; g.gain.value = 1.15; src.connect(g); g.connect(master);
+      src.start(t); pickerSrcs.push(src);
+      t += v.buffer.duration + (i === 0 ? 0.25 : 0);
+    });
+    stats.pickerSpeech.push(id + ':file'); stats.pickerPlays.push(log);
+    return true;
+  }
   function speakPickerWord(id) {
-    // Called synchronously inside the tap/click handler (iOS Safari only speaks from a user gesture).
+    // Called synchronously inside the tap/click handler, so ensureAudio() unlocks Web Audio on iOS.
+    var w = PICKER_WORDS[id];
+    if (!w) return;
+    ensureAudio();
+    if (playPickerClips(id)) return;
+    var a = voices[id + '-yue'], b = voices[id + '-en'];
+    if (a && b && a.state !== 'failed' && b.state !== 'failed') {
+      // first tap: the clips are still being decoded in the brand-new audio context; play them as soon as they're ready
+      var tries = 0;
+      (function wait() {
+        if (playPickerClips(id)) return;
+        if (a.state === 'failed' || b.state === 'failed' || ++tries > 30) { speakPickerTts(id); return; }
+        decodeVoices(); pickerTimer = setTimeout(wait, 50);
+      })();
+      return;
+    }
+    speakPickerTts(id);
+  }
+  function speakPickerTts(id) {   // fallback only: the clips failed to load
     var w = PICKER_WORDS[id];
     if (!w || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
     try {
@@ -988,7 +1032,7 @@
       b.lang = ttsVoices.en ? ttsVoices.en.lang.replace('_', '-') : 'en-GB'; if (ttsVoices.en) b.voice = ttsVoices.en;
       b.rate = 0.9; b.pitch = 1.25; b.volume = 1;
       speechSynthesis.speak(a); speechSynthesis.speak(b);
-      stats.pickerSpeech.push(id);
+      stats.pickerSpeech.push(id + ':speech');
     } catch (e) { /* speech is a bonus - never break the app */ }
   }
   function playVoice(k, delay) {
@@ -1415,6 +1459,7 @@
         lastNote: state.lastNote, notesPlayed: state.notesPlayed, tonesPlayed: stats.tonesPlayed,
         claps: stats.claps, applause: stats.applause, voice: { hooray: stats.voice.hooray, bye: stats.voice.bye },
         voiceVia: stats.voiceVia.slice(), voiceState: { hooray: voices.hooray.state, bye: voices.bye.state },
+        pickerVia: stats.pickerSpeech.slice(), pickerPlays: stats.pickerPlays.slice(), pickerClips: Object.keys(voices).filter(function (k) { return /-(yue|en)$/.test(k); }).map(function (k) { return k + ':' + voices[k].state; }),
         audioState: ctx ? ctx.state : 'none', confirmOpen: !confirmEl.hidden, againConfirmOpen: !againConfirm.hidden
       };
     }
