@@ -13,3 +13,9 @@ Every Chinese line on screen has its English directly below: 「選一首歌」 
 Tap anywhere!, 「好叻！」 / Hooray!, the dialogs and the goodbye screen. 小兔子乖乖 shows an English line under each
 Chinese lyric line. In portrait, the picker and play screens show the same rotate hint as the other games:
 「打橫部機，會更好玩！」 / "Turn the phone sideways — it's more fun!". Gameplay is unchanged.
+
+## Hub exit + mic release (tap-tunes-v10, 2026-10-05c-hub-exit)
+
+「返學樂園」 / Back to AstraGarten on No navigates to 星星學樂園. After goodbye audio the play-again
+prompt opens automatically. Leaving the tab/page at any point fully releases SpeechRecognition / mic
+(pagehide, beforeunload, unload, visibility hidden).
