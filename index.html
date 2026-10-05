@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>兒歌彈彈樂 Tap Tap Music for Toddlers</title>
 <meta name="description" content="Tap anywhere to play the next note of a favourite children's song. 拍一拍，唱兒歌。">
-<meta name="app-version" content="2026-10-05a-well-done-bye">
+<meta name="app-version" content="2026-10-05b-bilingual">
 <meta name="theme-color" content="#ffcf33">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -51,7 +51,8 @@
     font-size: clamp(22px, 5.5vmin, 46px); line-height: 1.15;
     color: #3a2a80; text-shadow: 0 2px 0 #fff;
   }
-  #picker h1 .zh { display: inline-block; margin-left: .4em; }
+  #picker h1 .zh { display: block; }
+  #picker h1 .en { display: block; font-size: .6em; font-weight: 800; color: #5f3dc4; }
   .songs {
     flex: 1; min-height: 0; list-style: none; margin: 0; padding: 0;
     display: grid; gap: 2.4vmin;
@@ -112,7 +113,12 @@
   .big-pic.bump-b svg { animation: bounceB .45s cubic-bezier(.3,1.6,.5,1); }
   @keyframes bounceA { 0% { transform: scale(1); } 25% { transform: translateY(-9%) scale(1.14, .92) rotate(-8deg); } 55% { transform: translateY(2%) scale(.94, 1.06) rotate(5deg); } 80% { transform: rotate(-2deg); } 100% { transform: none; } }
   @keyframes bounceB { 0% { transform: scale(1); } 25% { transform: translateY(-9%) scale(1.14, .92) rotate(8deg); } 55% { transform: translateY(2%) scale(.94, 1.06) rotate(-5deg); } 80% { transform: rotate(2deg); } 100% { transform: none; } }
-  .song-title { font-size: clamp(16px, 3.6vmin, 30px); font-weight: 800; color: rgba(255,255,255,.95); text-shadow: 0 2px 3px rgba(0,0,0,.35); text-align: center; }
+  .song-title { font-size: clamp(16px, 3.6vmin, 30px); font-weight: 800; color: rgba(255,255,255,.95); text-shadow: 0 2px 3px rgba(0,0,0,.35); text-align: center; line-height: 1.2; }
+  .song-title .zh, .song-title .en { display: block; }
+  .song-title .en { font-size: .75em; }
+  .lyric-en { font-size: clamp(15px, 3.6vmin, 32px); font-weight: 800; color: #fff; text-align: center; max-width: 95vw; line-height: 1.2;
+    text-shadow: 0 2px 3px rgba(0,0,0,.3); margin-top: -1vmin; }
+  .lyric-en:empty { display: none; }
   .lyric {
     font-size: clamp(22px, 7vmin, 68px); font-weight: 900; line-height: 1.25;
     color: #fff; text-align: center; max-width: 95vw;
@@ -121,7 +127,8 @@
   .lyric span { display: inline-block; margin: 0; transition: transform .12s, color .12s; opacity: .75; }
   .lyric span.done { opacity: 1; }
   .lyric span.cur { color: #fff200; opacity: 1; transform: scale(1.18) translateY(-.08em); margin: 0 .08em; }
-  .hint { font-size: clamp(16px, 4vmin, 34px); font-weight: 800; color: #fff; text-shadow: 0 2px 3px rgba(0,0,0,.3); text-align: center; }
+  .hint { font-size: clamp(16px, 4vmin, 34px); font-weight: 800; color: #fff; text-shadow: 0 2px 3px rgba(0,0,0,.3); text-align: center; line-height: 1.2; }
+  .hint .zh, .hint .en { display: block; } .hint .en { font-size: .75em; }
   .hint[hidden] { display: none; }
   .progress {
     position: absolute; left: 12%; right: 12%;
@@ -189,6 +196,8 @@
   }
   .panel h2 { margin: 0 0 4px; font-size: 22px; }
   .panel p { margin: 0 0 16px; font-size: 18px; }
+  .panel h2 [lang="en"], .panel p [lang="en"], .panel button [lang="en"] { display: block; font-size: .8em; }
+  .panel button [lang="en"] { font-weight: 700; }
   .panel .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .panel button {
     font: inherit; font-size: 17px; font-weight: 800; border: 0; border-radius: 14px;
@@ -219,7 +228,11 @@
     margin: 0; font-size: clamp(38px, 12vmin, 120px); font-weight: 900; line-height: 1.1; text-align: center;
     color: #5f3dc4; text-shadow: 0 3px 0 #fff, 0 0 16px rgba(255,255,255,.8); outline: none;
   }
-  #bye-title .zh { display: inline-block; margin-right: .25em; }
+  #bye-title .zh { display: block; }
+  #bye-title [lang="en"] { display: block; font-size: .5em; }
+  .bye-sub [lang="en"] { display: block; font-size: .85em; }
+  #again-btn .txt { display: flex; flex-direction: column; line-height: 1.05; text-align: left; }
+  #again-btn .txt [lang="en"] { font-size: .8em; }
   .bye-sub { margin: 0; font-size: clamp(16px, 3.6vmin, 30px); font-weight: 800; color: #5f3dc4; text-align: center; }
   #again-btn {
     position: absolute; z-index: 5;
@@ -300,7 +313,22 @@
     animation: petal-tumble var(--t) linear infinite; }
   @keyframes petal-tumble { from { transform: rotate(0deg) rotateX(0deg); } to { transform: rotate(360deg) rotateX(360deg); } }
 
+  /* Rotate hint (portrait), same as the other games: Chinese with English below */
+  #rotate { display: none; position: fixed; left: 50%; transform: translateX(-50%); z-index: 6; pointer-events: none;
+    bottom: calc(max(16px, env(safe-area-inset-bottom)) + 24px); width: max-content; max-width: 94vw;
+    align-items: center; gap: 10px; padding: 6px 16px; border-radius: 22px; background: #fff; border: 3px solid #ffcf33;
+    font-size: 16px; font-weight: 800; color: #3a2a80; box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+  #rotate svg { width: 30px; height: 30px; flex: 0 0 auto; animation: tilt 2.4s ease-in-out infinite; }
+  #rotate .txt { display: flex; flex-direction: column; line-height: 1.15; text-align: left; }
+  #rotate .en { font-size: 13px; font-weight: 700; color: #5f3dc4; }
+  @keyframes tilt { 0%,30% { transform: rotate(0); } 60%,100% { transform: rotate(-90deg); } }
+  @media (orientation: portrait) {
+    body.show-rotate #rotate { display: flex; }
+    body.show-rotate #picker { padding-bottom: calc(max(14px, env(safe-area-inset-bottom)) + 100px); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    #rotate svg { animation: none; transform: rotate(-90deg); }
     .spark { animation-duration: .6s; }
     .big-pic.bump-a svg, .big-pic.bump-b svg, .big-pic.idle svg { animation: none; }
     .hand-wave { animation-duration: 1.8s; }
@@ -314,7 +342,7 @@
   }
 </style>
 </head>
-<body>
+<body class="show-rotate">
   <!-- Inline SVG pictures (no external images). Referenced with <use> on the buttons and play screen. -->
   <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
     <defs>
@@ -548,7 +576,7 @@
 
   <!-- ===== Song picker ===== -->
   <main id="picker" class="screen" aria-labelledby="picker-title">
-    <h1 id="picker-title"><span lang="en">Pick a song</span> <span class="zh" lang="zh-HK">選一首歌</span></h1>
+    <h1 id="picker-title"><span class="zh" lang="zh-HK">選一首歌</span> <span class="en" lang="en">Pick a song</span></h1>
     <ul class="songs" aria-label="歌曲 Songs">
       <li><button type="button" class="song-btn" data-song="bunny">
         <span class="pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><use href="#pic-bunny" xlink:href="#pic-bunny"/></svg></span>
@@ -596,11 +624,12 @@
       <div class="big-pic idle" id="big-pic" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><g id="big-pic-art" data-pic=""></g></svg></div>
       <div class="song-title" id="song-title" aria-hidden="true"></div>
       <div class="lyric" id="lyric" aria-hidden="true"></div>
-      <div class="hint" id="hint" aria-hidden="true">Tap anywhere! <span lang="zh-HK">拍一拍！</span></div>
+      <div class="lyric-en" id="lyric-en" aria-hidden="true" lang="en"></div>
+      <div class="hint" id="hint" aria-hidden="true"><span class="zh" lang="zh-HK">拍一拍！</span><span class="en" lang="en">Tap anywhere!</span></div>
       <div class="progress" aria-hidden="true"><div id="progress-bar"></div></div>
       <div id="petals" aria-hidden="true"></div>
       <div id="fx" aria-hidden="true"></div>
-      <div class="celebrate" id="celebrate" aria-hidden="true" hidden><div id="clap-crowd" aria-hidden="true"></div><div>🎉<br>Hooray! 好叻！</div></div>
+      <div class="celebrate" id="celebrate" aria-hidden="true" hidden><div id="clap-crowd" aria-hidden="true"></div><div>🎉<br><span lang="zh-HK">好叻！</span><br><span lang="en">Hooray!</span></div></div>
     </div>
     <button type="button" id="back-btn" aria-label="返回歌曲列表 Back to songs（家長用 parent control）" aria-describedby="back-help">
       <span aria-hidden="true">✕</span>
@@ -609,8 +638,8 @@
 
     <div id="confirm" class="overlay" hidden>
       <div class="panel" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-desc">
-        <h2 id="confirm-title">Back to the song list?</h2>
-        <p id="confirm-desc" lang="zh-HK">返回歌曲列表？</p>
+        <h2 id="confirm-title"><span lang="zh-HK">返回歌曲列表？</span> <span lang="en">Back to the song list?</span></h2>
+        <p id="confirm-desc"><span lang="zh-HK">家長用：返去揀歌。</span> <span lang="en">Parent control: go back to choose a song.</span></p>
         <div class="row">
           <button type="button" id="confirm-yes"><span lang="zh-HK">好，返回</span> <span lang="en">Yes, back to songs</span></button>
           <button type="button" id="confirm-no"><span lang="zh-HK">繼續玩</span> <span lang="en">Keep playing</span></button>
@@ -618,6 +647,12 @@
       </div>
     </div>
   </main>
+
+  <!-- Rotate hint (portrait only, picker + play screens) -->
+  <div id="rotate" role="note">
+    <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="12" y="4" width="16" height="30" rx="4" fill="#fff" stroke="#3a2a80" stroke-width="3"/><circle cx="20" cy="29" r="1.8" fill="#3a2a80"/></svg>
+    <span class="txt"><span class="zh" lang="zh-HK">打橫部機，會更好玩！</span><span class="en" lang="en">Turn the phone sideways — it's more fun!</span></span>
+  </div>
 
   <!-- ===== Goodbye screen (after 3 completed songs) ===== -->
   <main id="goodbye" class="screen" hidden aria-labelledby="bye-title">
@@ -638,7 +673,7 @@
     <h1 id="bye-title" tabindex="-1"><span class="zh" lang="zh-HK">拜拜！</span><span lang="en">Bye bye!</span></h1>
     <p class="bye-sub"><span lang="zh-HK">玩咗三首歌，好叻！</span> <span lang="en">Three songs, well done!</span></p>
     <button type="button" id="again-btn" aria-describedby="again-help">
-      <span aria-hidden="true">↻</span><span lang="zh-HK">再玩過</span> <span lang="en">Play again</span>
+      <span aria-hidden="true">↻</span><span class="txt"><span lang="zh-HK">再玩過</span> <span lang="en">Play again</span></span>
     </button>
     <p id="again-help" class="sr-only"><span lang="zh-HK">家長用：會先問你確認。</span> <span lang="en">Parent control: asks you to confirm. Sighted parents can also press and hold for 1.5 seconds.</span></p>
 
@@ -673,6 +708,11 @@
       // 6 5 6 5 | 3 6 5 | 5 5 3 2 | 1 | 6̣ 1 2 3 | 1. Two verses; "來" is sung over the last three notes.
       id: 'bunny', en: 'Little Bunny', zh: '小兔子乖乖', pic: 'bunny', picZh: '小兔子乖乖',
       colors: [330, 200, 110],
+      // English shown under each Chinese lyric line (one per line below)
+      linesEn: ['Little bunny, be good,', 'Open the door for me,', 'Hurry, open up,', 'I want to come in.',
+        "No, no, I won't open,", "Mummy isn't home yet,", "I won't open for anyone.",
+        'Little bunny, be good,', 'Open the door for me,', 'Hurry, open up,', 'I want to come in.',
+        "OK, OK, I'll open,", 'Mummy is home now,', "I'll open the door right now."],
       lines: [
         ['E5 G5 C6 A5 G5', '小-兔-子-乖-乖，'],
         ['E5 G5 A5 C6 G5', '把-門-兒-開-開，'],
@@ -785,7 +825,7 @@
 
   function $(id) { return document.getElementById(id); }
   var picker = $('picker'), play = $('play'), playArea = $('play-area'), fx = $('fx'),
-      bigPic = $('big-pic'), bigPicArt = $('big-pic-art'), petals = $('petals'), songTitle = $('song-title'), lyric = $('lyric'), hint = $('hint'),
+      bigPic = $('big-pic'), bigPicArt = $('big-pic-art'), petals = $('petals'), songTitle = $('song-title'), lyric = $('lyric'), lyricEn = $('lyric-en'), hint = $('hint'),
       progressBar = $('progress-bar'), celebrateEl = $('celebrate'), backBtn = $('back-btn'),
       confirmEl = $('confirm'), confirmYes = $('confirm-yes'), confirmNo = $('confirm-no'),
       goodbye = $('goodbye'), byeTitle = $('bye-title'), againBtn = $('again-btn'),
@@ -1170,6 +1210,7 @@
     }
     lyric.textContent = '';
     lyric.appendChild(frag);
+    lyricEn.textContent = (s.linesEn && s.linesEn[li]) || '';   // English under a Chinese lyric line
     progressBar.style.width = (100 * state.index / s.notes.length).toFixed(2) + '%';
   }
 
@@ -1242,14 +1283,14 @@
     playArea.setAttribute('data-song', s.id);
     bigPic.className = 'big-pic idle';
     songTitle.innerHTML = '';
-    songTitle.appendChild(document.createTextNode(s.en + ' · '));
-    var z = document.createElement('span'); z.lang = 'zh-HK'; z.textContent = s.zh; songTitle.appendChild(z);
+    var z = document.createElement('span'); z.lang = 'zh-HK'; z.className = 'zh'; z.textContent = s.zh; songTitle.appendChild(z);
+    var e = document.createElement('span'); e.lang = 'en'; e.className = 'en'; e.textContent = s.en; songTitle.appendChild(e);
     playArea.style.backgroundColor = 'hsl(' + s.colors[0] + ',85%,58%)';
     playArea.setAttribute('aria-label', s.picZh + '，' + s.zh + '. ' + s.en + '. 拍一拍 Tap to play next note.');
     fx.textContent = '';
     hint.hidden = false;
     renderLyric(-1);
-    picker.hidden = true; goodbye.hidden = true; play.hidden = false; confirmEl.hidden = true;
+    picker.hidden = true; goodbye.hidden = true; play.hidden = false; confirmEl.hidden = true; document.body.classList.add('show-rotate');
     document.body.classList.add('playing');
     focusEl(playArea);
     announce('Playing ' + zh(s.picZh === s.zh ? s.zh : s.picZh + '，' + s.zh) + ', ' + en(s.en) + '. ' + zh('拍一拍。') + ' ' + en('Tap anywhere to play the next note.'));
@@ -1264,7 +1305,7 @@
     // After an automatic return, ignore taps for a moment so a toddler still tapping
     // the play screen does not start a song by accident.
     pickerGuardUntil = now() + (opts.auto ? 1200 : 500);
-    play.hidden = true; goodbye.hidden = true; picker.hidden = false;
+    play.hidden = true; goodbye.hidden = true; picker.hidden = false; document.body.classList.add('show-rotate');
     document.body.classList.remove('playing');
     var target = (opts.reset ? null : lastSongBtn) || picker.querySelector('.song-btn');
     focusEl(target);
@@ -1283,7 +1324,7 @@
   function goToGoodbye() {
     clearCelebration(); cancelAllHolds(); closeConfirm(true); closeAgain(true);
     state.screen = 'goodbye'; state.song = null; state.index = 0;
-    play.hidden = true; picker.hidden = true; goodbye.hidden = false;
+    play.hidden = true; picker.hidden = true; goodbye.hidden = false; document.body.classList.remove('show-rotate');
     document.body.classList.remove('playing');
     focusEl(byeTitle);
     announce(zh('做得好好！拜拜！') + ' ' + en('Well done! Bye bye!') + ' ' + zh('玩咗三首歌。家長可以用右上角「再玩過」掣。') + ' ' +
